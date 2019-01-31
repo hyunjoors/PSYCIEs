@@ -10,3 +10,4 @@ Data Summary
 January 31, 2019
   - Training Data is available under "training_data_participant"
   - Development Data is available under "dev_data_participant"
+  - To get started, please "git clone https://github.com/shin234/PSYCIEs.git" on whichever filepath you would like
