@@ -12,8 +12,6 @@ def vector(folderPath, filePath):
     data = pd.read_csv(filePath)
 
     X = data.iloc[:, 1:6]
-    
-    y = data.iloc[:, 6:11]
 
     # rename columns for easier access
     X.rename(columns={'open_ended_1': 'A',
@@ -21,12 +19,6 @@ def vector(folderPath, filePath):
                     'open_ended_3': 'E',
                     'open_ended_4': 'N', 
                     'open_ended_5': 'O'}, inplace=True)
-
-    y.rename(columns={'E_Scale_score': 'E',
-                    'A_Scale_score': 'A',
-                    'O_Scale_score': 'O',
-                    'C_Scale_score': 'C',
-                    'N_Scale_score': 'N'}, inplace=True)
 
     # put all five responses into one "paragraph"
     X_group = X.stack().groupby(level=0).apply(' '.join)
@@ -118,8 +110,8 @@ def summarize(dictionaryType):
 print("Indexing Training Data...")
 trainDictionary, grouped_trainDictionary = vector("training_data_participant", "training_data_participant/siop_ml_train_participant.csv")
 
-# print("Indexing Development Data...")
-# devDictionary = vector("dev_data_participant/siop_ml_dev_participant.csv")
+print("Indexing Development Data...")
+devDictionary, grouped_devDictionary= vector("dev_data_participant", "dev_data_participant/siop_ml_dev_participant.csv")
 
 # print("Training Data Summary...")
 # summarize(trainDictionary)
