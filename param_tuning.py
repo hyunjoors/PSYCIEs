@@ -56,21 +56,13 @@ def processData(filePath, seed, test_size):
 
 def param_tuning(X_train, X_test, y_train, y_test):
 
-  # Pipeline the estimators
-  pipeline = Pipeline([
-      ('vect', CountVectorizer()),
-      ('tfidf', TfidfTransformer()),
-      ('svd', TruncatedSVD()),
-      ('clf', ClfSwitcher()),
-  ])
-
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
       'vect__ngram_range': [(1, 2), (2, 3)],  # (1, 1), (1, 3), (2, 2), ...
       'tfidf__use_idf': [True],
       #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'vect__stop_words': ['english', None],
       'svd__random_state': [random_seed],
-      'svd__n_components': [1, 5],  # list(range(1,101)),
+      'svd__n_components': [1, 5],  # np.arange(1,51,2)),
   }
 
   # list of dictionaries
@@ -88,17 +80,12 @@ def param_tuning(X_train, X_test, y_train, y_test):
     #   'clf__estimator': [MultinomialNB()],
     #   'clf__estimator__alpha': (1e-2, 1e-3, 1e-1),
     # },
-    # {
-    #   'clf__estimator': [SVR()],
-    #   'clf__kernel': ['linear'],
-    #   'clf__C': np.logspace(-2, 6, 9),
-    #   'clf__gamma': np.logspace(-3, 2, 6),
-    # },
-    # {
-    #   'clf__estimator': [SVR()],
-    #   'clf__kernel': ['rbf'],
-    #   'clf__gamma': np.logspace(-3, 2, 6),
-    # },
+    {
+      'clf__estimator': [SVR()],
+      'clf__kernel': ['rbf', 'linear'],
+      'clf__C': np.logspace(-2, 6, 9),
+      'clf__gamma': list(np.logspace(-3, 2, 6)),
+    },
     {
       'clf__estimator': [LinearRegression()],
     },
@@ -124,7 +111,15 @@ def param_tuning(X_train, X_test, y_train, y_test):
   for i in range(len(parameter_dict)):
     parameter_dict[i].update(list(sub_parameter_dict.items()))
 
-  gridSearch = GridSearchCV(pipeline, parameter_dict, cv=5, verbose=0, return_train_score=False, scoring='neg_mean_absolute_error')
+  # Pipeline the estimators
+  pipeline = Pipeline([
+      ('vect', CountVectorizer()),
+      ('tfidf', TfidfTransformer()),
+      ('svd', TruncatedSVD()),
+      ('clf', ClfSwitcher()),
+  ])
+
+  gridSearch = GridSearchCV(pipeline, parameter_dict, cv=3, verbose=0, return_train_score=False, scoring='r2')
   for trait in ['O', 'C', 'E', 'A', 'N']:
     gridSearch.fit(X_train, y_train[trait])
     y_pred = gridSearch.predict(X_test)
@@ -132,8 +127,10 @@ def param_tuning(X_train, X_test, y_train, y_test):
     print('Best Hyper-Parameter Result for trait {}\n Mean r: {}\n{}'.format(trait, r, gridSearch.best_params_.values()))
 
     result = pd.DataFrame.from_dict(gridSearch.cv_results_)
+    result.drop(
+        columns=['mean_fit_time', 'std_fit_time', 'mean_score_time', 'std_score_time', 'params'])
     fileNanme = trait + "_tuning_result.csv"
-    result.to_csv(fileNanme, index=False)
+    result.to_csv(fileNanme, mode='a')
 
 
 if __name__ == "__main__":
