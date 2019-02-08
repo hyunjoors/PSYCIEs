@@ -6,6 +6,7 @@ import operator
 import re
 import csv
 from collections import OrderedDict
+from collections import Counter
 from operator import itemgetter
 
 def vector(folderPath, filePath):
@@ -26,12 +27,7 @@ def vector(folderPath, filePath):
     X = X.get_values()
     X_group = X_group.get_values()
 
-
     # Hash answers
-    # parsed_user_answer_list: contains list of 'user_list'
-    # user_list: contains 5 sentence_dict, which correspond to OCEAN
-    # word_list: parsed list of words from a single answer
-    # sentence_dict: hashed word_list Key: word, Value: count
     (n,m) = X.shape
 
     delim = " ", ".", ",", "(", ")", "\n", "\r", "\t", "\b", '\x00'
@@ -45,20 +41,12 @@ def vector(folderPath, filePath):
             # for each answer
             word_list = re.split(regexPattern, X[i][j])
             word_list = list(filter(None, word_list))
-            sentence_dict = {}
-            for k in range(len(word_list)):
-                if word_list[k] not in sentence_dict:
-                    # word not exists in the dictionary
-                    sentence_dict[word_list[k]] = 1
-                else:
-                    sentence_dict[word_list[k]] += 1
-            
+            sentence_dict = Counter()
+            sentence_dict.update(word_list) # Update counter with words
             sentence_dict = dict(sorted(sentence_dict.items(), key = itemgetter(1), reverse = True))
             user_list.append(sentence_dict)
 
         parsed_user_answer_list.append(user_list)
-
-    #print(parsed_user_answer_list[0])
     
     ocean = ["A", "C", "E", "N", "O"]
     csvFile = folderPath + '/individual_answers.csv' 
@@ -75,19 +63,10 @@ def vector(folderPath, filePath):
     for i in range(n):
         word_list = re.split(regexPattern, X_group[i])
         word_list = list(filter(None, word_list))
-        sentence_dict = {}
-        for k in range(len(word_list)):
-            if word_list[k] not in sentence_dict:
-                # word not exists in the dictionary
-                sentence_dict[word_list[k]] = 1
-            else:
-                sentence_dict[word_list[k]] += 1
-        #user_list.append(sentence_dict)
+        sentence_dict = Counter()
+        sentence_dict.update(word_list) 
         sentence_dict = dict(sorted(sentence_dict.items(), key = itemgetter(1), reverse = True))
         parsed_user_grouped_answer_list.append(sentence_dict)
-    
-    #print(X_group[0])
-    #print(parsed_user_grouped_answer_list[0])
     
     csvFile = folderPath + '/grouped_answers.csv' 
     with open(csvFile, 'w') as output_file:
