@@ -1,7 +1,7 @@
 # https://stackoverflow.com/questions/50285973/pipeline-multiple-classifiers
 
 from ClfSwitcher import ClfSwitcher
-import EstimatorSelectionHelper
+from EstimatorSelectionHelper import EstimatorSelectionHelper
 
 import numpy as np
 import numpy.random as rand
@@ -10,7 +10,7 @@ import sklearn.metrics
 
 from sklearn import datasets
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, ParameterGrid, cross_val_score
-from sklearn.pipeline import Pipeline, make_pipeline
+from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.metrics import classification_report
@@ -67,7 +67,7 @@ def param_tuning(X_train, X_test, y_train, y_test):
 
   # list of dictionaries
   # clf estimator will take a place of ClfSwitcher()
-  parameter_dict = [
+  parameter_dict = {
     # {
     #   # SVM if hinge loss / logreg if log loss
     #   'clf__estimator': [SGDClassifier()],
@@ -80,15 +80,14 @@ def param_tuning(X_train, X_test, y_train, y_test):
     #   'clf__estimator': [MultinomialNB()],
     #   'clf__estimator__alpha': (1e-2, 1e-3, 1e-1),
     # },
-    {
-      'clf__estimator': [SVR()],
+    'SVR': {
       'clf__kernel': ['rbf', 'linear'],
       'clf__C': np.logspace(-2, 6, 9),
       'clf__gamma': list(np.logspace(-3, 2, 6)),
-    },
-    {
-      'clf__estimator': [LinearRegression()],
-    },
+      },
+    # {
+    #   'clf__estimator': [LinearRegression()],
+    # },
     # {
     #   'clf__estimator': [ExtraTreesClassifier()],
     #   'clf__n_estimators': [16, 32],
@@ -106,30 +105,34 @@ def param_tuning(X_train, X_test, y_train, y_test):
     #   'clf__n_estimators': [16, 32],
     #   'clf__learning_rate': [0.8, 1.0],
     # },
-  ]
+  }
 
-  for i in range(len(parameter_dict)):
-    parameter_dict[i].update(list(sub_parameter_dict.items()))
+  for key in parameter_dict.keys():
+    parameter_dict[key].update(list(sub_parameter_dict.items()))
 
-  # Pipeline the estimators
-  pipeline = Pipeline([
-      ('vect', CountVectorizer()),
-      ('tfidf', TfidfTransformer()),
-      ('svd', TruncatedSVD()),
-      ('clf', ClfSwitcher()),
-  ])
+  clf_dict = {
+      # 'ExtraTreesClassifier': ExtraTreesClassifier(),
+      # 'RandomForestClassifier': RandomForestClassifier(),
+      # 'AdaBoostClassifier': AdaBoostClassifier(),
+      # 'GradientBoostingClassifier': GradientBoostingClassifier(),
+      'SVR': SVR(),
+      'LinearRegression': LinearRegression(),
+  }
 
-  gridSearch = GridSearchCV(pipeline, parameter_dict, cv=3, verbose=0, return_train_score=False, scoring='r2')
+  #gridSearch = GridSearchCV(pipeline, parameter_dict, cv=3, verbose=0, return_train_score=False, scoring='r2')
+  #gridSearch = pipeline(pipeline, parameter_dict)
+  gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
   for trait in ['O', 'C', 'E', 'A', 'N']:
     gridSearch.fit(X_train, y_train[trait])
+    
     y_pred = gridSearch.predict(X_test)
     r = np.corrcoef(y_pred, y_test[trait])[0, 1]
     print('Best Hyper-Parameter Result for trait {}\n Mean r: {}\n{}'.format(trait, r, gridSearch.best_params_.values()))
 
-    result = pd.DataFrame.from_dict(gridSearch.cv_results_)
+    result = gridSearch.score_summary()
     result.drop(
         columns=['mean_fit_time', 'std_fit_time', 'mean_score_time', 'std_score_time', 'params'])
-    fileNanme = trait + "_tuning_result.csv"
+    fileNanme = trait + "_tuningResult.csv"
     result.to_csv(fileNanme, mode='a')
 
 

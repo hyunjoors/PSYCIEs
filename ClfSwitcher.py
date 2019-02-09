@@ -10,7 +10,6 @@ class ClfSwitcher(BaseEstimator):
         :param estimator: sklearn object - The classifier
         """
         self.estimator = estimator
-        print(estimator)
 
     def fit(self, X, y=None, **kwargs):
         self.estimator.fit(X, y)

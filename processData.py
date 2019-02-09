@@ -9,6 +9,8 @@ from collections import OrderedDict
 from collections import Counter
 from operator import itemgetter
 
+from sklearn.neighbors import KNeighborsRegressor
+
 def vector(folderPath, filePath):
     data = pd.read_csv(filePath)
 
@@ -89,8 +91,8 @@ def summarize(dictionaryType):
 print("Indexing Training Data...")
 trainDictionary, grouped_trainDictionary = vector("training_data_participant", "training_data_participant/siop_ml_train_participant.csv")
 
-print("Indexing Development Data...")
-devDictionary, grouped_devDictionary= vector("dev_data_participant", "dev_data_participant/siop_ml_dev_participant.csv")
+# print("Indexing Development Data...")
+# devDictionary, grouped_devDictionary= vector("dev_data_participant", "dev_data_participant/siop_ml_dev_participant.csv")
 
 # print("Training Data Summary...")
 # summarize(trainDictionary)
