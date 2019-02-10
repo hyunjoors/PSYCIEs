@@ -4,6 +4,7 @@ import numpy as np
 import numpy.random as rand
 import pandas as pd
 import sklearn.metrics
+import csv
 
 from sklearn import datasets
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, ParameterGrid, cross_val_score
@@ -54,7 +55,7 @@ def param_tuning(X_train, X_test, y_train, y_test):
 
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
       'vect__ngram_range': [(1, 2), (2, 3)],  # (1, 1), (1, 3), (2, 2), ...
-      'vect__stop_words': ['english', None],
+      'vect__stop_words': [None, 'english'],
       'tfidf__use_idf': [True],
       #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'svd__random_state': [random_seed],
@@ -77,9 +78,12 @@ def param_tuning(X_train, X_test, y_train, y_test):
     # },
     'SVR': {
       'clf__kernel': ['rbf', 'linear'],
-      'clf__C': np.logspace(-2, 6, 9),
+      'clf__C': np.logspace(-2, 5, 8),
       'clf__gamma': list(np.logspace(-3, 2, 6)),
       },
+    'LinearRegression': {
+      
+    }
     # {
     #   'clf__estimator': [ExtraTreesClassifier()],
     #   'clf__n_estimators': [16, 32],
@@ -107,26 +111,32 @@ def param_tuning(X_train, X_test, y_train, y_test):
       # 'RandomForestClassifier': RandomForestClassifier(),
       # 'AdaBoostClassifier': AdaBoostClassifier(),
       # 'GradientBoostingClassifier': GradientBoostingClassifier(),
-      'SVR': SVR(),
       'LinearRegression': LinearRegression(),
+      'SVR': SVR(),
   }
 
-  #gridSearch = GridSearchCV(pipeline, parameter_dict, cv=3, verbose=0, return_train_score=False, scoring='r2')
-  #gridSearch = pipeline(pipeline, parameter_dict)
-  gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
+  
   for trait in ['O', 'C', 'E', 'A', 'N']:
     # for fitting, add parameters for gridSearch
     # n_jobs, cv, verbose
-    gridSearch.fit(X_train, y_train[trait], n_jobs=None, cv=3, verbose=5, scoring=‘r2’)
+    print("Hyper-Parameter Tuning for %s" % trait)
+    gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
+    gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
+                    n_jobs=None, cv=3, verbose=0, return_train_score=False)
     
-    y_pred = gridSearch.predict(X_test)
-    r = np.corrcoef(y_pred, y_test[trait])[0, 1]
-    print('Best Hyper-Parameter Result for trait {}\n Mean r: {}\n{}'.format(trait, r, gridSearch.best_params_.values()))
+    result = []
+    result.append({'trait': trait})
+    result.append({'estimator': gridSearch.best_['estimator']})
+    for key, value in gridSearch.best_['params'].items():
+      result.append({key: value})
+    result.append({'r': gridSearch.best_['r']})
+    result = {k: v for d in result for k, v in d.items()}
+    result = pd.DataFrame(result)
+    
+    print('Best Hyper-Parameter Result for trait {}\n{}\n'.format(trait, result))
 
-    result = gridSearch.score_summary()
-    #result.drop(columns=['mean_fit_time', 'std_fit_time', 'mean_score_time', 'std_score_time', 'params'])
-    fileName = trait + "_tuningResult.csv"
-    result.to_csv(fileName, mode='a')
+    result.to_csv("tuningResult.csv", mode='a', index=False)
+    
 
 
 if __name__ == "__main__":

@@ -1,5 +1,3 @@
-from EstimatorSelectionHelper import EstimatorSelectionHelper
-
 import numpy as np
 import numpy.random as rand
 import pandas as pd
@@ -48,35 +46,22 @@ def prepareData(filePath):
     return (X, y)
 
 
-def predict_OCEAN(X_test, y_text, X_dev):
-
-    # list of dictionaries
-    parameter_dict = {
-        'vect__ngram_range': [(1, 2)],  # (1, 1), (1, 3), (2, 2), ...
-        'vect__stop_words': [None],
-        'tfidf__use_idf': [True],
-        #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
-        'svd__random_state': [random_seed],
-        'svd__n_components': [1],  # np.arange(1,51,2)),
-        'clf__kernel': ['rbf'],
-        'clf__C': [1.0],
-        'clf__gamma': [0.001],
-    }
-
-    pipeline = Pipeline([
-        ('vect', CountVectorizer()),
-        ('tfidf', TfidfTransformer()),
-        ('svd', TruncatedSVD()),
-        ('clf', SVR()),
-    ])
+def predict_OCEAN(X_test, y_text, X_dev, OCEAN_model_dict, OCEAN_params_dict):
 
     file = "siop_ml_dev_submission_format.csv"
     result = pd.read_csv(file, header=0)
-    #print(result.columns, resu)
-
-    gridSearch = GridSearchCV(pipeline, parameter_dict, n_jobs=None, cv=3, verbose=1, scoring='r2')
 
     for trait in ['O', 'C', 'E', 'A', 'N']:
+        pipeline = Pipeline([
+            ('vect', CountVectorizer()),
+            ('tfidf', TfidfTransformer()),
+            ('svd', TruncatedSVD()),
+            ('clf', OCEAN_model_dict[trait]),
+        ])
+        
+        gridSearch = GridSearchCV(pipeline, OCEAN_params_dict[trait],
+                          n_jobs=None, cv=3, verbose=5, scoring='r2')
+
         print("Predicting Score for %s" % trait)
         gridSearch.fit(X_train, y_train[trait])
 
@@ -89,14 +74,92 @@ def predict_OCEAN(X_test, y_text, X_dev):
     result.to_csv(file, index=False)
 
 if __name__ == "__main__":
-    #Enter csv filePath/fileName: asdf
-    #Enter random_seed: 0
-    #Enter test_size(0-1): 0
 
     X_train, y_train = prepareData(
         'training_data_participant/siop_ml_train_participant.csv')
     X_dev, y_dev = prepareData(
         'dev_data_participant/siop_ml_dev_participant.csv')
 
+    OCEAN_model_dict = {
+        'O': SVR(),
+        'C': SVR(),
+        'E': SVR(),
+        'A': SVR(),
+        'N': SVR(),
+    }
 
-    predict_OCEAN(X_train, y_train, X_dev)
+    OCEAN_params_dict= {
+       'O': {
+           'vect__ngram_range': [(2, 3)],  # (1, 1), (1, 3), (2, 2), ...
+           'vect__stop_words': ['english'],
+
+           'tfidf__use_idf': [True],
+           #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+
+           'svd__random_state': [random_seed],
+           'svd__n_components': [5],  # np.arange(1,51,2)),
+
+           'clf__kernel': ['rbf'],
+           'clf__C': [0.1],
+           'clf__gamma': [100],
+       },
+       'C': {
+           'vect__ngram_range': [(2, 3)],  # (1, 1), (1, 3), (2, 2), ...
+           'vect__stop_words': [None],
+
+           'tfidf__use_idf': [True],
+           #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+
+           'svd__random_state': [random_seed],
+           'svd__n_components': [5],  # np.arange(1,51,2)),
+
+           'clf__kernel': ['rbf'],
+           'clf__C': [0.01],
+           'clf__gamma': [100],
+       },
+       'E': {
+           'vect__ngram_range': [(1, 2)],  # (1, 1), (1, 3), (2, 2), ...
+           'vect__stop_words': ['english'],
+
+           'tfidf__use_idf': [True],
+           #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+
+           'svd__random_state': [random_seed],
+           'svd__n_components': [5],  # np.arange(1,51,2)),
+
+           'clf__kernel': ['linear'],
+           'clf__C': [1],
+           'clf__gamma': [0.001],
+       },
+       'A': {
+           'vect__ngram_range': [(2, 3)],  # (1, 1), (1, 3), (2, 2), ...
+           'vect__stop_words': ['english'],
+
+           'tfidf__use_idf': [True],
+           #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+
+           'svd__random_state': [random_seed],
+           'svd__n_components': [5],  # np.arange(1,51,2)),
+
+           'clf__kernel': ['rbf'],
+           'clf__C': [0.01],
+           'clf__gamma': [100],
+       },
+       'N': {
+           'vect__ngram_range': [(1, 2)],  # (1, 1), (1, 3), (2, 2), ...
+           'vect__stop_words': ['english'],
+
+           'tfidf__use_idf': [True],
+           #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+
+           'svd__random_state': [random_seed],
+           'svd__n_components': [5],  # np.arange(1,51,2)),
+
+           'clf__kernel': ['linear'],
+           'clf__C': [1],
+           'clf__gamma': [0.001],
+       },
+    }
+
+
+    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict)

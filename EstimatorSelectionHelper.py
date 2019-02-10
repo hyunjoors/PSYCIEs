@@ -21,11 +21,17 @@ class EstimatorSelectionHelper:
         self.params = params_dict
         self.keys = models_dict.keys()
         #print(self.keys)
-        self.grid_searches = {}
+        self.best_ = {
+            'estimator': [None],
+            'params': {},
+            'y_pred': [],
+            'r': [],
+        }
 
-    def fit(self, X, y, **grid_kwargs):
+    def tune(self, X_train, y_train, X_test, y_test, **grid_kwargs):
+        max_r = -1
         for key in self.keys:
-            print("Running GridSearchCV for %s." % key)
+            print("\tRunning GridSearchCV for %s." % key)
             model = self.models[key]
             params = self.params[key]
 
@@ -38,28 +44,38 @@ class EstimatorSelectionHelper:
             ])
             
             gs = GridSearchCV(pipeline, params, **grid_kwargs)
-            gs.fit(X, y)
-            self.grid_searches[key] = gs
-            print('Model Fitting for %s Done.' % key)
+            gs.fit(X_train, y_train)
+
+            print("\tPredicting for %s." % key)
+            y_pred = gs.predict(X_test)
+            r = np.corrcoef(y_pred, y_test)[0, 1]
+            
+            if (r > max_r):
+                self.best_['estimator'] = model
+                self.best_['params'] = gs.best_params_
+                self.best_['r'] = r
+                self.best_['y_pred'] = y_pred
+            
+            print('\tTuning for %s Done.' % key)
+        #print(self.best_)
+
     
-    def predict(self, X, y=None):
-        return self.estimator.predict(X)
 
-    def score_summary(self, sort_by='mean_test_score'):
-        frames = []
-        for name, grid_search in self.grid_searches.items():
-            frame = pd.DataFrame(grid_search.cv_results_)
-            frame = frame.filter(regex='^(?!.*param_).*$')
-            frame['estimator'] = len(frame)*[name]
-            frames.append(frame)
-        df = pd.concat(frames)
+    # def score_summary(self, sort_by='mean_test_score'):
+    #     frames = []
+    #     for name, grid_search in self.grid_searches.items():
+    #         frame = pd.DataFrame(grid_search.cv_results_)
+    #         frame = frame.filter(regex='^(?!.*param_).*$')
+    #         frame['estimator'] = len(frame)*[name]
+    #         frames.append(frame)
+    #     df = pd.concat(frames)
 
-        df = df.sort_values([sort_by], ascending=False)
-        df = df.reset_index()
-        df = df.drop(['rank_test_score', 'index'], 1)
+    #     df = df.sort_values([sort_by], ascending=False)
+    #     df = df.reset_index()
+    #     #df = df.drop(['rank_test_score', 'index'], 1)
 
-        columns = df.columns.tolist()
-        columns.remove('estimator')
-        columns = ['estimator']+columns
-        df = df[columns]
-        return df
+    #     columns = df.columns.tolist()
+    #     columns.remove('estimator')
+    #     columns = ['estimator']+columns
+    #     df = df[columns]
+    #     return df
