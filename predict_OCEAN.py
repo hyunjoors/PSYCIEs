@@ -15,9 +15,6 @@ from sklearn.linear_model import LinearRegression, Lasso, SGDClassifier, Logisti
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 
 random_seed = 8424
-# train_test_split - test_size
-# random_seed
-
 
 def prepareData(filePath):
     # Training Data Setup

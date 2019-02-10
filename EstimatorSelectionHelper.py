@@ -1,6 +1,5 @@
 # http://www.davidsbatista.net/blog/2018/02/23/model_optimization/
 
-
 import numpy as np
 import pandas as pd
 
@@ -57,25 +56,3 @@ class EstimatorSelectionHelper:
                 self.best_['y_pred'] = y_pred
             
             print('\tTuning for %s Done.' % key)
-        #print(self.best_)
-
-    
-
-    # def score_summary(self, sort_by='mean_test_score'):
-    #     frames = []
-    #     for name, grid_search in self.grid_searches.items():
-    #         frame = pd.DataFrame(grid_search.cv_results_)
-    #         frame = frame.filter(regex='^(?!.*param_).*$')
-    #         frame['estimator'] = len(frame)*[name]
-    #         frames.append(frame)
-    #     df = pd.concat(frames)
-
-    #     df = df.sort_values([sort_by], ascending=False)
-    #     df = df.reset_index()
-    #     #df = df.drop(['rank_test_score', 'index'], 1)
-
-    #     columns = df.columns.tolist()
-    #     columns.remove('estimator')
-    #     columns = ['estimator']+columns
-    #     df = df[columns]
-    #     return df

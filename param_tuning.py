@@ -17,8 +17,6 @@ from sklearn.linear_model import LinearRegression, Lasso, SGDClassifier, Logisti
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
 
 random_seed = 8424
-# train_test_split - test_size
-# random_seed
 
 def processData(filePath, seed, test_size):
   # Training Data Setup
@@ -117,8 +115,6 @@ def param_tuning(X_train, X_test, y_train, y_test):
 
   
   for trait in ['O', 'C', 'E', 'A', 'N']:
-    # for fitting, add parameters for gridSearch
-    # n_jobs, cv, verbose
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
