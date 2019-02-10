@@ -27,6 +27,8 @@ class EstimatorSelectionHelper:
         for key in self.keys:
             print("Running GridSearchCV for %s." % key)
             model = self.models[key]
+            params = self.params[key]
+
             #Pipeline the estimators
             pipeline = Pipeline([
                 ('vect', CountVectorizer()),
@@ -34,10 +36,8 @@ class EstimatorSelectionHelper:
                 ('svd', TruncatedSVD()),
                 ('clf', model),
             ])
-            params = self.params[key]
-            #print(pipeline)
-            #print(params)
-            gs = GridSearchCV(pipeline, params, verbose=1)
+            
+            gs = GridSearchCV(pipeline, params, **grid_kwargs)
             gs.fit(X, y)
             self.grid_searches[key] = gs
             print('Model Fitting for %s Done.' % key)
