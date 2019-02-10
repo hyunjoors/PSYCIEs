@@ -26,8 +26,8 @@ ex.
 
 
 # Instruction for OCEAN Score Prediction
-1. OCEAN_model_dict
+1. OCEAN_model_dict  
 For each trait, please specify the best estimator.  
 
-2. OCEAN_params_dict
+2. OCEAN_params_dict  
 For each trait, please specify the parameters for a corresponding model.
