@@ -2,7 +2,7 @@
 2019 SIOP Machine Learning Competition Repository for PSYCIEs
 
 # Instruction for Hyper-Parameter Tuning
-1. sub_parameter_dict
+1. sub_parameter_dict  
 This is for CountVectorizer, TfidfTransformer and TruncatedSVD's parameters.  
 If you want to change the parameters of these, please edit as you need  
 
