@@ -28,7 +28,7 @@ class EstimatorSelectionHelper:
         }
 
     def tune(self, X_train, y_train, X_test, y_test, **grid_kwargs):
-        max_r = -1
+        max_r = 0
         for key in self.keys:
             print("\tRunning GridSearchCV for %s." % key)
             model = self.models[key]
@@ -49,10 +49,13 @@ class EstimatorSelectionHelper:
             y_pred = gs.predict(X_test)
             r = np.corrcoef(y_pred, y_test)[0, 1]
             
-            if (r > max_r):
+            
+            if (abs(r) > abs(max_r)):
                 self.best_['estimator'] = model
                 self.best_['params'] = gs.best_params_
                 self.best_['r'] = r
                 self.best_['y_pred'] = y_pred
+            
+            print(self.best_)
             
             print('\tTuning for %s Done.' % key)
