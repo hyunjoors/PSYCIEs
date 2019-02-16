@@ -112,7 +112,24 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
       # 'GradientBoostingClassifier': GradientBoostingClassifier(),
       'LinearRegression': LinearRegression(),
       'SVR': SVR(),
+      'XGBoost',
+      'NB': ,
   }
+
+  # relationshp between question and answers
+  # most common words and least common word for each answers
+  # Doc to Vect / word to vect
+
+  # XGBoosts
+  # Naive Bayes
+  # based on the OCEAN score
+  # calculate idf 
+  # # pipeline = Pipeline([
+  #               ('vect', CountVectorizer()),
+  #               ('tfidf', TfidfTransformer()),
+  #               ('svd', TruncatedSVD()),
+  #               ('clf', model),
+  #           ])
 
   
   for trait in ['O', 'C', 'E', 'A', 'N']:
