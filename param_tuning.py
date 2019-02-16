@@ -5,17 +5,20 @@ import numpy.random as rand
 import pandas as pd
 import sklearn.metrics
 import csv
-from pandas import Series
+import xgboost as xgb
 
+from pandas import Series
 from sklearn import datasets
-from sklearn.model_selection import train_test_split, RandomizedSearchCV, GridSearchCV, ParameterGrid, cross_val_score
+from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, LeaveOneOut
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC, SVR
-from sklearn.linear_model import LinearRegression, SGDClassifier, LogisticRegression
-from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.linear_model import LinearRegression, ElasticNetCV
+from sklearn.ensemble import AdaBoostClassifier, GradientBoostingRegressor
+from xgboost import XGBRegressor
+
 
 random_seed = 8424
 
@@ -63,57 +66,73 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
 
   # list of dictionaries
   parameter_dict = {
-    # {
-    #   # SVM if hinge loss / logreg if log loss
-    #   'clf__estimator': [SGDClassifier()],
-    #   'clf__estimator__penalty': ('l2', 'elasticnet', 'l1'),
-    #   'clf__estimator__max_iter': [50, 80],
-    #   'clf__estimator__tol': [1e-4],
-    #   'clf__estimator__loss': ['hinge', 'log', 'modified_huber'],
-    # },
-    # {
-    #   'clf__estimator': [MultinomialNB()],
-    #   'clf__estimator__alpha': (1e-2, 1e-3, 1e-1),
-    # },
+    'LinearRegression': {
+      'clf__fit_intercept': [True, False],
+      'clf__normalize': [True, False],
+      },
     'SVR': {
-      'clf__kernel': ['rbf', 'linear'],
+      'clf__kernel': ['rbf', 'linear', 'poly', 'sigmoid', 'precomputed'],
+      'clf__degree': [2, 3],
       'clf__C': np.logspace(-2, 5, 8),
       'clf__gamma': list(np.logspace(-3, 2, 6)),
+      'clf__coef0': [0, 5],
+      #'clf__tol': [],
+      'clf__epsilon': list(np.logspace(-5, -1, 6)),
+      'clf__shrinking': [True, False],
       },
-    'LinearRegression': {
-      
-    }
-    # {
-    #   'clf__estimator': [ExtraTreesClassifier()],
-    #   'clf__n_estimators': [16, 32],
-    # },
-    # {
-    #   'clf__estimator': [RandomForestClassifier()],
-    #   'clf__n_estimators': [16, 32],
-    # },
-    # {
-    #   'clf__estimator': [AdaBoostClassifier()],
-    #   'clf__n_estimators': [16, 32],
-    # },
-    # {
-    #   'clf__estimator': [GradientBoostingClassifier()],
-    #   'clf__n_estimators': [16, 32],
-    #   'clf__learning_rate': [0.8, 1.0],
-    # },
+    'XGB': {
+      'clf__max_depth': [3, 4, 5, 6, 7, 8, 9, 10],
+      'clf__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
+      'clf__n_estimators': [],
+      'clf__silent': [],
+      'clf__objective': ['binary:logistic', 'multi:softmax'],
+      'clf__booster': ['gbtree', 'gblinear'],
+      'clf__gamma': [0], ## Needs to be tuned
+      'clf__min_child_weight': [1], ##
+      #'clf__max_delta_step': [],
+      'clf__subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      'clf__colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      #'clf__colsample_bylevel': [], # subsample & bytree will do the job
+      'clf__reg_alpha': [0], # can be used in case of very high dimensionality
+      'clf__reg_lambda': [1], # can be used to reduce overfitting
+      'clf__sacle_pos_weight': [1], # can be used in case of high imbalance as it helps in faster convergence
+      'clf__base_score': [],
+      'clf__seed': [],
+      'clf__random_state': [],
+      'clf__missing': [],
+      'clf__importance_type': [],
+      },
+    'ElasticNet': {
+      'clf__l1_ratio': [],
+      'clf__eps': [],
+      'clf__n_alphas': [],
+      'clf__alphas': [],
+      'clf__fit_intercept': [],
+      'clf__normalize': [],
+      'clf__precompute': [],
+      'clf__max_iter': [],
+      'clf__tol': [],
+      'clf__cv': [],
+      'clf__copy_X': [],
+      'clf__positive': [],
+      'clf__random_state': [],
+      'clf__selection': [],
+      },
   }
 
   for key in parameter_dict.keys():
     parameter_dict[key].update(list(sub_parameter_dict.items()))
 
   clf_dict = {
-      # 'ExtraTreesClassifier': ExtraTreesClassifier(),
-      # 'RandomForestClassifier': RandomForestClassifier(),
-      # 'AdaBoostClassifier': AdaBoostClassifier(),
-      # 'GradientBoostingClassifier': GradientBoostingClassifier(),
       'LinearRegression': LinearRegression(),
       'SVR': SVR(),
+<<<<<<< HEAD
       'XGBoost',
       'NB': ,
+=======
+      'XGB': XGBRegressor,
+      #'ElasticNet': ElasticNetCV(),
+>>>>>>> 9fdb1c408592ec19a212c4cbb0d737271566ff9f
   }
 
   # relationshp between question and answers
@@ -136,7 +155,7 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
-                    n_jobs=-1, cv=3, verbose=0, return_train_score=False)
+                    n_jobs=-5, cv=3, verbose=1, return_train_score=False)
     
     result = []
     result.append({'trait': trait})
@@ -187,7 +206,7 @@ def param_tuning_individual(X_train, X_test, y_train, y_test):
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
-                    n_jobs=None, cv=3, verbose=0, return_train_score=False)
+                    n_jobs=None, cv=3, verbose=1, return_train_score=False)
 
     result = []
     result.append({'trait': trait})
@@ -213,18 +232,23 @@ if __name__ == "__main__":
   #     'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
   # param_tuning_group(X_train, X_test, y_train, y_test)
   
-  print("Tuning with 0.1")
-  X_train, X_test, y_train, y_test = processData(
-      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'group')
   # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
   # because the individual's document has only one string.
+
+  print("Tuning with test_size=0.05")
+  X_train, X_test, y_train, y_test = processData(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'group')
   #param_tuning_individual(X_train, X_test, y_train, y_test)
   param_tuning_group(X_train, X_test, y_train, y_test)
 
-  print("Tuning with 0.05")
+  print("Tuning with test_size=0.1")
   X_train, X_test, y_train, y_test = processData(
-      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'group')
-  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
-  # because the individual's document has only one string.
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'group')
+  #param_tuning_individual(X_train, X_test, y_train, y_test)
+  param_tuning_group(X_train, X_test, y_train, y_test)
+
+  print("Tuning with test_size=0.25")
+  X_train, X_test, y_train, y_test = processData(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
   #param_tuning_individual(X_train, X_test, y_train, y_test)
   param_tuning_group(X_train, X_test, y_train, y_test)

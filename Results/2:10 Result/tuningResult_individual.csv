@@ -1,0 +1,35 @@
+trait,estimator,clf__C,clf__gamma,clf__kernel,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+O,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",1.0,0.001,linear,5,8424,True,1,english,0.08137917930977508
+O,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",1.0,0.001,linear,5,8424,True,1,english,0.08137917930977508
+trait,estimator,clf__C,clf__gamma,clf__kernel,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+C,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",0.1,1.0,rbf,1,8424,True,1,,0.15218367250074905
+C,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",0.1,1.0,rbf,1,8424,True,1,,0.15218367250074905
+trait,estimator,clf__C,clf__gamma,clf__kernel,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+E,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",0.1,10.0,rbf,5,8424,True,1,english,0.1326256028484459
+E,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",0.1,10.0,rbf,5,8424,True,1,english,0.1326256028484459
+trait,estimator,clf__C,clf__gamma,clf__kernel,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+A,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",0.01,100.0,rbf,5,8424,True,2,,0.18557206294569248
+A,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",0.01,100.0,rbf,5,8424,True,2,,0.18557206294569248
+trait,estimator,clf__C,clf__gamma,clf__kernel,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+N,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",1.0,0.1,rbf,5,8424,True,2,,0.0221477759703558
+N,"SVR(C=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1,
+  gamma='auto_deprecated', kernel='rbf', max_iter=-1, shrinking=True,
+  tol=0.001, verbose=False)",1.0,0.1,rbf,5,8424,True,2,,0.0221477759703558
