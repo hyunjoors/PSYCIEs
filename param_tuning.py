@@ -126,13 +126,8 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
   clf_dict = {
       'LinearRegression': LinearRegression(),
       'SVR': SVR(),
-<<<<<<< HEAD
-      'XGBoost',
-      'NB': ,
-=======
       'XGB': XGBRegressor,
       #'ElasticNet': ElasticNetCV(),
->>>>>>> 9fdb1c408592ec19a212c4cbb0d737271566ff9f
   }
 
   # relationshp between question and answers
