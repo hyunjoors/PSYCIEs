@@ -69,39 +69,39 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
     'LinearRegression': {
       'clf__fit_intercept': [True, False],
       'clf__normalize': [True, False],
-    },
+      },
     'SVR': {
       'clf__kernel': ['rbf', 'linear', 'poly', 'sigmoid', 'precomputed'],
-      'clf__degree': [],
+      'clf__degree': [2, 3],
       'clf__C': np.logspace(-2, 5, 8),
       'clf__gamma': list(np.logspace(-3, 2, 6)),
-      'clf__coef0': [],
-      'clf__tol': [],
-      'clf__epsilon': [],
-      'clf__shrinking': [],
+      'clf__coef0': [0, 5],
+      #'clf__tol': [],
+      'clf__epsilon': list(np.logspace(-5, -1, 6)),
+      'clf__shrinking': [True, False],
       },
     'XGB': {
-      'clf__max_dept': [],
-      'clf__learning_rate': [],
+      'clf__max_depth': [3, 4, 5, 6, 7, 8, 9, 10],
+      'clf__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
       'clf__n_estimators': [],
       'clf__silent': [],
-      'clf__objective': [],
-      'clf__booster': [],
-      'clf__gamma': [],
-      'clf__min_child_weight': [],
-      'clf__max_delta_step': [],
-      'clf__subsample': [],
-      'clf__colsample_bytree': [],
-      'clf__colsample_bylevel': [],
-      'clf__reg_alpha': [],
-      'clf__reg_lambda': [],
-      'clf__sacle_pos_weight': [],
+      'clf__objective': ['binary:logistic', 'multi:softmax'],
+      'clf__booster': ['gbtree', 'gblinear'],
+      'clf__gamma': [0], ## Needs to be tuned
+      'clf__min_child_weight': [1], ##
+      #'clf__max_delta_step': [],
+      'clf__subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      'clf__colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+      #'clf__colsample_bylevel': [], # subsample & bytree will do the job
+      'clf__reg_alpha': [0], # can be used in case of very high dimensionality
+      'clf__reg_lambda': [1], # can be used to reduce overfitting
+      'clf__sacle_pos_weight': [1], # can be used in case of high imbalance as it helps in faster convergence
       'clf__base_score': [],
       'clf__seed': [],
       'clf__random_state': [],
       'clf__missing': [],
       'clf__importance_type': [],
-    },
+      },
     'ElasticNet': {
       'clf__l1_ratio': [],
       'clf__eps': [],
@@ -117,7 +117,7 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
       'clf__positive': [],
       'clf__random_state': [],
       'clf__selection': [],
-    }
+      },
   }
 
   for key in parameter_dict.keys():
@@ -127,7 +127,7 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
       'LinearRegression': LinearRegression(),
       'SVR': SVR(),
       'XGB': XGBRegressor,
-      'ElasticNet': ElasticNetCV(),
+      #'ElasticNet': ElasticNetCV(),
   }
 
   
@@ -212,28 +212,23 @@ if __name__ == "__main__":
   #     'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
   # param_tuning_group(X_train, X_test, y_train, y_test)
   
+  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
+  # because the individual's document has only one string.
 
-
-  print("Tuning with 0.05")
+  print("Tuning with test_size=0.05")
   X_train, X_test, y_train, y_test = processData(
       'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'group')
-  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
-  # because the individual's document has only one string.
   #param_tuning_individual(X_train, X_test, y_train, y_test)
   param_tuning_group(X_train, X_test, y_train, y_test)
 
-  print("Tuning with 0.1")
+  print("Tuning with test_size=0.1")
   X_train, X_test, y_train, y_test = processData(
       'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'group')
-  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
-  # because the individual's document has only one string.
   #param_tuning_individual(X_train, X_test, y_train, y_test)
   param_tuning_group(X_train, X_test, y_train, y_test)
 
-  print("Tuning with 0.25")
+  print("Tuning with test_size=0.25")
   X_train, X_test, y_train, y_test = processData(
       'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
-  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
-  # because the individual's document has only one string.
   #param_tuning_individual(X_train, X_test, y_train, y_test)
   param_tuning_group(X_train, X_test, y_train, y_test)
