@@ -5,7 +5,7 @@ import pandas as pd
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD, PCA
 
 
@@ -36,13 +36,14 @@ class EstimatorSelectionHelper:
 
             #Pipeline the estimators
             pipeline = Pipeline([
-                ('vect', CountVectorizer()),
-                ('tfidf', TfidfTransformer()),
+                ('tfidf', TfidfVectorizer,
                 ('svd', TruncatedSVD()),
                 ('clf', model),
             ])
             
             gs = GridSearchCV(pipeline, params, **grid_kwargs)
+            print(X_train[0])
+            print(X_train[1])
             gs.fit(X_train, y_train)
 
             print("\tPredicting for %s." % key)
@@ -56,6 +57,7 @@ class EstimatorSelectionHelper:
                 self.best_['r'] = r
                 self.best_['y_pred'] = y_pred
             
-            #print(self.best_)
+            print("Current Best")
+            print(self.best_)
             
             print('\tTuning for %s Done.' % key)

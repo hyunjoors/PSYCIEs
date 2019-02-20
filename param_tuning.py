@@ -1,11 +1,12 @@
 from EstimatorSelectionHelper import EstimatorSelectionHelper
+from processData import processData
 
 import numpy as np
 import numpy.random as rand
 import pandas as pd
 import sklearn.metrics
 import csv
-import xgboost as xgb
+#import xgboost as xgb
 
 from pandas import Series
 from sklearn import datasets
@@ -22,7 +23,7 @@ from xgboost import XGBRegressor
 
 random_seed = 8424
 
-def processData(filePath, seed, test_size, group):
+def test_split(filePath, seed, test_size, group):
   # Training Data Setup
   data_train = pd.read_csv(filePath)
 
@@ -170,22 +171,70 @@ def param_tuning_group(X_train, X_test, y_train, y_test):
 def param_tuning_individual(X_train, X_test, y_train, y_test):
 
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
-      'vect__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
-      'vect__stop_words': [None, 'english'],
-      'tfidf__use_idf': [True],
+      # (1, 1), (1, 3), (2, 2), ...
+      'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+      'tfidf__stop_words': [None, 'english'],
+      'tfidf__use_idf': [True, False],
+      'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'svd__random_state': [random_seed],
-      'svd__n_components': [1, 5],
+      'svd__n_components': [1, 5, 10, 40, 50],  # np.arange(1,51,2)),
   }
 
   # list of dictionaries
   parameter_dict = {
+      'LinearRegression': {
+          'clf__fit_intercept': [True, False],
+          'clf__normalize': [True, False],
+      },
       'SVR': {
-          'clf__kernel': ['rbf', 'linear'],
+          'clf__kernel': ['rbf', 'linear', 'poly', 'sigmoid', 'precomputed'],
+          'clf__degree': [2, 3],
           'clf__C': np.logspace(-2, 5, 8),
           'clf__gamma': list(np.logspace(-3, 2, 6)),
+          'clf__coef0': [0, 5],
+          #'clf__tol': [],
+          'clf__epsilon': list(np.logspace(-5, -1, 6)),
+          'clf__shrinking': [True, False],
       },
-      'LinearRegression': {
-
+      'XGB': {
+          'clf__max_depth': [3, 4, 5, 6, 7, 8, 9, 10],
+          'clf__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
+          'clf__n_estimators': [],
+          'clf__silent': [],
+          'clf__objective': ['binary:logistic', 'multi:softmax'],
+          'clf__booster': ['gbtree', 'gblinear'],
+          'clf__gamma': [0],  # Needs to be tuned
+          'clf__min_child_weight': [1],
+          #'clf__max_delta_step': [],
+          'clf__subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+          'clf__colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+          #'clf__colsample_bylevel': [], # subsample & bytree will do the job
+          # can be used in case of very high dimensionality
+          'clf__reg_alpha': [0],
+          'clf__reg_lambda': [1],  # can be used to reduce overfitting
+          # can be used in case of high imbalance as it helps in faster convergence
+          'clf__sacle_pos_weight': [1],
+          'clf__base_score': [],
+          'clf__seed': [],
+          'clf__random_state': [],
+          'clf__missing': [],
+          'clf__importance_type': [],
+      },
+      'ElasticNet': {
+          'clf__l1_ratio': [],
+          'clf__eps': [],
+          'clf__n_alphas': [],
+          'clf__alphas': [],
+          'clf__fit_intercept': [],
+          'clf__normalize': [],
+          'clf__precompute': [],
+          'clf__max_iter': [],
+          'clf__tol': [],
+          'clf__cv': [],
+          'clf__copy_X': [],
+          'clf__positive': [],
+          'clf__random_state': [],
+          'clf__selection': [],
       },
   }
 
@@ -193,15 +242,16 @@ def param_tuning_individual(X_train, X_test, y_train, y_test):
     parameter_dict[key].update(list(sub_parameter_dict.items()))
 
   clf_dict = {
-      'LinearRegression': LinearRegression(),
+      #'LinearRegression': LinearRegression(),
       'SVR': SVR(),
   }
 
   for trait in ['O', 'C']:#, 'E', 'A', 'N']:
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
+    print(X_train[trait])
     gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
-                    n_jobs=None, cv=3, verbose=1, return_train_score=False)
+                    n_jobs=-1, cv=3, verbose=1, return_train_score=False)
 
     result = []
     result.append({'trait': trait})
@@ -231,19 +281,19 @@ if __name__ == "__main__":
   # because the individual's document has only one string.
 
   print("Tuning with test_size=0.05")
-  X_train, X_test, y_train, y_test = processData(
-      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'group')
-  #param_tuning_individual(X_train, X_test, y_train, y_test)
-  param_tuning_group(X_train, X_test, y_train, y_test)
+  X_train, X_test, y_train, y_test = test_split(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'ind')
+  param_tuning_individual(X_train, X_test, y_train, y_test)
+  #param_tuning_group(X_train, X_test, y_train, y_test)
 
   print("Tuning with test_size=0.1")
-  X_train, X_test, y_train, y_test = processData(
-      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'group')
-  #param_tuning_individual(X_train, X_test, y_train, y_test)
-  param_tuning_group(X_train, X_test, y_train, y_test)
+  X_train, X_test, y_train, y_test = test_split(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'ind')
+  param_tuning_individual(X_train, X_test, y_train, y_test)
+  #param_tuning_group(X_train, X_test, y_train, y_test)
 
   print("Tuning with test_size=0.25")
-  X_train, X_test, y_train, y_test = processData(
-      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
-  #param_tuning_individual(X_train, X_test, y_train, y_test)
-  param_tuning_group(X_train, X_test, y_train, y_test)
+  X_train, X_test, y_train, y_test = test_split(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'ind')
+  param_tuning_individual(X_train, X_test, y_train, y_test)
+  #param_tuning_group(X_train, X_test, y_train, y_test)
