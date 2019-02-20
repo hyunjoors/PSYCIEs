@@ -9,8 +9,6 @@ from collections import OrderedDict
 from collections import Counter
 from operator import itemgetter
 
-from sklearn.neighbors import KNeighborsRegressor
-
 
 class processData:
 
@@ -42,8 +40,8 @@ class processData:
         # Hash answers
         (n,m) = X.shape
 
-        delim = " ", ".", ",", "(", ")", "\n", "\r", "\t", "\b", '\x00', "?"
-        regexPattern = '|'.join(map(re.escape, delim))
+        # delim = " ", ".", ",", "(", ")", "\n", "\r", "\t", "\b", '\x00', "?"
+        # regexPattern = '|'.join(map(re.escape, delim))
 
         parsed_user_answer_list = []
         for i in range(n):
@@ -51,20 +49,25 @@ class processData:
             user_list = []
             for j in range(5):
                 # for each answer
-                word_list = re.split(regexPattern, X[i][j])
-                word_list = pd.Series(list(filter(None, word_list)))
-                word_list.str.lower()
-                word_count_list = Counter(word_list) # Update counter with words
+                current_ans = pd.Series(X[i][j])
+                current_ans.str.split(pat = ' .,()\n\r\t\b\x00')
+                current_ans.str.lower()
+                #print(current_ans)
+                
+                word_count_list = Counter(current_ans) # Update counter with words
                 word_count_list = dict(sorted(word_count_list.items(), key = itemgetter(1), reverse = True))
                 user_list.append(word_count_list)
+
             parsed_user_answer_list.append(user_list)
         
         parsed_user_grouped_answer_list = []
         for i in range(n):
-            word_list = re.split(regexPattern, X_group[i])
-            word_list = list(filter(None, word_list))
-            word_list = [x.lower() for x in word_list]
-            word_count_list = Counter(word_list)
+            current_ans = pd.Series(X[i][j])
+            current_ans.str.split(pat = ' .,()\n\r\t\b\x00')
+            current_ans.str.lower()
+            print(current_ans)
+
+            word_count_list = Counter(current_ans)
             word_count_list = dict(sorted(word_count_list.items(), key = itemgetter(1), reverse = True))
             parsed_user_grouped_answer_list.append(word_count_list)
         
