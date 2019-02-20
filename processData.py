@@ -52,36 +52,34 @@ class processData:
             for j in range(5):
                 # for each answer
                 word_list = re.split(regexPattern, X[i][j])
-                word_list = list(filter(None, word_list))
-                word_list = [x.lower() for x in word_list]
-                sentence_dict = Counter()
-                sentence_dict.update(word_list) # Update counter with words
-                sentence_dict = dict(sorted(sentence_dict.items(), key = itemgetter(1), reverse = True))
-                user_list.append(sentence_dict)
-
+                word_list = pd.Series(list(filter(None, word_list)))
+                word_list.str.lower()
+                word_count_list = Counter(word_list) # Update counter with words
+                word_count_list = dict(sorted(word_count_list.items(), key = itemgetter(1), reverse = True))
+                user_list.append(word_count_list)
             parsed_user_answer_list.append(user_list)
         
-        ocean = ["A", "C", "E", "N", "O"]
-        csvFile = folderPath + '/individual_Count.csv' 
-        with open(csvFile, 'w') as output_file:
-            for i in range(n):
-                for j in range(5):
-                    output_file.write("%s," % ocean[j])
-                    for key in parsed_user_answer_list[i][j].keys():
-                        output_file.write("%s,%d," % (key, parsed_user_answer_list[i][j][key]))
-                    output_file.write("\n")
-                output_file.write("\n")
-
         parsed_user_grouped_answer_list = []
         for i in range(n):
             word_list = re.split(regexPattern, X_group[i])
             word_list = list(filter(None, word_list))
             word_list = [x.lower() for x in word_list]
-            sentence_dict = Counter()
-            sentence_dict.update(word_list) 
-            sentence_dict = dict(sorted(sentence_dict.items(), key = itemgetter(1), reverse = True))
-            parsed_user_grouped_answer_list.append(sentence_dict)
+            word_count_list = Counter(word_list)
+            word_count_list = dict(sorted(word_count_list.items(), key = itemgetter(1), reverse = True))
+            parsed_user_grouped_answer_list.append(word_count_list)
         
+        ocean = ["A", "C", "E", "N", "O"]
+        csvFile = folderPath + '/individual_Count.csv'
+        with open(csvFile, 'w') as output_file:
+            for i in range(n):
+                for j in range(5):
+                    output_file.write("%s," % ocean[j])
+                    for key in parsed_user_answer_list[i][j].keys():
+                        output_file.write("%s,%d," % (
+                            key, parsed_user_answer_list[i][j][key]))
+                    output_file.write("\n")
+                output_file.write("\n")
+
         csvFile = folderPath + '/grouped_Counts.csv' 
         with open(csvFile, 'w') as output_file:
             for i in range(n):

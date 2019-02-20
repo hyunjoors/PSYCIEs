@@ -36,7 +36,7 @@ class EstimatorSelectionHelper:
 
             #Pipeline the estimators
             pipeline = Pipeline([
-                ('tfidf', TfidfVectorizer,
+                ('tfidf', TfidfVectorizer()),
                 ('svd', TruncatedSVD()),
                 ('clf', model),
             ])

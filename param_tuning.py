@@ -18,7 +18,7 @@ from sklearn.metrics import classification_report
 from sklearn.svm import SVC, SVR
 from sklearn.linear_model import LinearRegression, ElasticNetCV
 from sklearn.ensemble import AdaBoostClassifier, GradientBoostingRegressor
-from xgboost import XGBRegressor
+#from xgboost import XGBRegressor
 
 
 random_seed = 8424
@@ -242,7 +242,7 @@ def param_tuning_individual(X_train, X_test, y_train, y_test):
     parameter_dict[key].update(list(sub_parameter_dict.items()))
 
   clf_dict = {
-      #'LinearRegression': LinearRegression(),
+      'LinearRegression': LinearRegression(),
       'SVR': SVR(),
   }
 
@@ -273,10 +273,6 @@ if __name__ == "__main__":
   #Enter random_seed: 0
   #Enter test_size(0-1): 0
 
-  # X_train, X_test, y_train, y_test = processData(
-  #     'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
-  # param_tuning_group(X_train, X_test, y_train, y_test)
-  
   # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
   # because the individual's document has only one string.
 
@@ -284,16 +280,22 @@ if __name__ == "__main__":
   X_train, X_test, y_train, y_test = test_split(
       'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'ind')
   param_tuning_individual(X_train, X_test, y_train, y_test)
-  #param_tuning_group(X_train, X_test, y_train, y_test)
+  X_train, X_test, y_train, y_test = test_split(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, 'group')
+  param_tuning_group(X_train, X_test, y_train, y_test)
 
   print("Tuning with test_size=0.1")
   X_train, X_test, y_train, y_test = test_split(
       'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'ind')
   param_tuning_individual(X_train, X_test, y_train, y_test)
-  #param_tuning_group(X_train, X_test, y_train, y_test)
+  X_train, X_test, y_train, y_test = test_split(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.1, 'group')
+  param_tuning_group(X_train, X_test, y_train, y_test)
 
   print("Tuning with test_size=0.25")
   X_train, X_test, y_train, y_test = test_split(
       'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'ind')
   param_tuning_individual(X_train, X_test, y_train, y_test)
-  #param_tuning_group(X_train, X_test, y_train, y_test)
+  X_train, X_test, y_train, y_test = test_split(
+      'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.25, 'group')
+  param_tuning_group(X_train, X_test, y_train, y_test)
