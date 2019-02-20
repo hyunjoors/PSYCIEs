@@ -42,8 +42,6 @@ class EstimatorSelectionHelper:
             ])
             
             gs = GridSearchCV(pipeline, params, **grid_kwargs)
-            print(X_train[0])
-            print(X_train[1])
             gs.fit(X_train, y_train)
 
             print("\tPredicting for %s." % key)
@@ -58,6 +56,8 @@ class EstimatorSelectionHelper:
                 self.best_['y_pred'] = y_pred
             
             print("Current Best")
-            print(self.best_)
+            print(self.best_['estimator'])
+            print(self.best_['params'])
+            print(self.best_['r'])
             
             print('\tTuning for %s Done.' % key)
