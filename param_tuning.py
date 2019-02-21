@@ -147,8 +147,8 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size):
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
-      gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
-                          n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
+      gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait], 
+                      n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
                       n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')

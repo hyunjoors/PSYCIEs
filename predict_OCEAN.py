@@ -12,7 +12,7 @@ from pandas import Series
 from sklearn import datasets
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, LeaveOneOut
 from sklearn.pipeline import Pipeline
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.metrics import classification_report
 from sklearn.svm import SVC, SVR
@@ -94,17 +94,17 @@ def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 
 
     for trait in ['O', 'C', 'E', 'A', 'N']:
         pipeline = Pipeline([
-            ('vect', CountVectorizer()),
-            ('tfidf', TfidfTransformer()),
+            ('tfidf', TfidfVectorizer()),
             ('svd', TruncatedSVD()),
             ('clf', OCEAN_model_dict[trait]),
         ])
 
         print("Predicting Score for %s" % trait)
+        gridSearch = GridSearchCV(pipeline, OCEAN_params_dict[trait])
         
         if group == 'group':
-            pipeline.fit(X_train, y_train[trait])
-            y_pred = pd.DataFrame(pipeline.predict(X_dev))
+            gridSearch.fit(X_train, y_train[trait])
+            y_pred = pd.DataFrame(gridSearch.predict(X_dev))
         else:
             pipeline.fit(X_train[trait], y_train[trait])
             y_pred = pd.DataFrame(pipeline.predict(X_dev[trait]))
@@ -140,40 +140,43 @@ if __name__ == "__main__":
            'tfidf__use_idf': [True, False],
            'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
            'svd__random_state': [random_seed],
-           'svd__n_components': [1, 5, 10, 40, 50],  # np.arange(1,51,2)),
+           # np.arange(1,51,2)),
+           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
+
+           'clf__booster': ['gbtree', 'dart'],
        },
        'C': {
-           #gbtree	50	8424	0.5	1, 2		TRUE
-           'tfidf__ngram_range': [(1, 2)],
-           'tfidf__stop_words': [None],
+           'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+           'tfidf__stop_words': [None, 'english'],
            'tfidf__use_idf': [True, False],
-           'tfidf__max_df': (0.5),
+           'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
            'svd__random_state': [random_seed],
-           'svd__n_components': [50],  # np.arange(1,51,2)),
+           # np.arange(1,51,2)),
+           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
 
-           'clf__booster': ['gbtree'],
+           'clf__booster': ['gbtree', 'dart'],
        },
        'E': {
-           #gbtree	50	8424	0.5	1, 1		TRUE
-           'tfidf__ngram_range': [(1, 1)],
-           'tfidf__stop_words': [None],
-           'tfidf__use_idf': [True],
-           'tfidf__max_df': (0.5),
+           'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+           'tfidf__stop_words': [None, 'english'],
+           'tfidf__use_idf': [True, False],
+           'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
            'svd__random_state': [random_seed],
-           'svd__n_components': [50],  # np.arange(1,51,2)),
+           # np.arange(1,51,2)),
+           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
 
-           'clf__booster': ['gbtree'],
+           'clf__booster': ['gbtree', 'dart'],
        },
        'A': {
-           #gbtree	50	8424	1	1, 1	english	TRUE
-           'tfidf__ngram_range': [(1, 1)],
-           'tfidf__stop_words': ['english'],
-           'tfidf__use_idf': [True],
-           'tfidf__max_df': (1),
+           'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+           'tfidf__stop_words': [None, 'english'],
+           'tfidf__use_idf': [True, False],
+           'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
            'svd__random_state': [random_seed],
-           'svd__n_components': [50],  # np.arange(1,51,2)),
+           # np.arange(1,51,2)),
+           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
 
-           'clf__booster': ['gbtree'],
+           'clf__booster': ['gbtree', 'dart'],
        },
        'N': {
            'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
@@ -181,7 +184,10 @@ if __name__ == "__main__":
            'tfidf__use_idf': [True, False],
            'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
            'svd__random_state': [random_seed],
-           'svd__n_components': [1, 5, 10, 40, 50],  # np.arange(1,51,2)),
+           # np.arange(1,51,2)),
+           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
+
+           'clf__booster': ['gbtree', 'dart'],
        },
     }
 

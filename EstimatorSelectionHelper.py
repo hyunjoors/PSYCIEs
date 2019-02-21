@@ -27,6 +27,9 @@ class EstimatorSelectionHelper:
             'r': [],
         }
 
+    def predict(self):
+        return self.best_['r']
+
     def tune(self, X_train, y_train, X_test, y_test, **grid_kwargs):
         max_r = 0
         for key in self.keys:
