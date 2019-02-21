@@ -1,0 +1,30 @@
+trait,estimator,clf__fit_intercept,clf__normalize,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+O,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,10,8424,True,1,,0.39927742113492043
+O,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,10,8424,True,1,,0.39927742113492043
+trait,estimator,clf__fit_intercept,clf__normalize,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+C,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,50,8424,True,1,english,0.007172353521593174
+C,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,50,8424,True,1,english,0.007172353521593174
+trait,estimator,clf__fit_intercept,clf__normalize,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+O,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,10,8424,True,1,,0.23055357804718452
+O,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,10,8424,True,1,,0.23055357804718452
+trait,estimator,clf__fit_intercept,clf__normalize,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+C,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,40,8424,True,1,english,-0.015372726069541522
+C,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,40,8424,True,1,english,-0.015372726069541522
+trait,estimator,clf__fit_intercept,clf__normalize,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+O,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,10,8424,True,1,english,0.061320030895907145
+O,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,True,10,8424,True,1,english,0.061320030895907145
+trait,estimator,clf__fit_intercept,clf__normalize,svd__n_components,svd__random_state,tfidf__use_idf,vect__ngram_range,vect__stop_words,r
+C,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,False,40,8424,True,1,english,0.12982030720765333
+C,"LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,
+         normalize=False)",True,False,40,8424,True,1,english,0.12982030720765333
