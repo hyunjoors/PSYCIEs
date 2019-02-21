@@ -23,6 +23,7 @@ from xgboost import XGBRegressor
 
 random_seed = 8424
 
+
 def test_split(filePath, seed, test_size, group):
   # Training Data Setup
   data_train = pd.read_csv(filePath)
@@ -48,12 +49,11 @@ def test_split(filePath, seed, test_size, group):
     X = X.stack().groupby(level=0).apply(' '.join)
 
   X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                    random_state=seed,
-                                                    test_size=test_size,
-                                                    shuffle=True)
+                                                      random_state=seed,
+                                                      test_size=test_size,
+                                                      shuffle=True)
 
   return (X_train, X_test, y_train, y_test)
-
 
   # relationshp between question and answers
   # most common words and least common word for each answers
@@ -61,7 +61,7 @@ def test_split(filePath, seed, test_size, group):
 
   # Naive Bayes
   # based on the OCEAN score
-  # calculate idf 
+  # calculate idf
 
 
 def param_tuning(X_train, X_test, y_train, y_test, group):
@@ -97,8 +97,8 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
           # 'clf__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
           # 'clf__n_estimators': [],
           # 'clf__silent': [],
-          # 'clf__objective': ['binary:logistic', 'multi:softmax'],
-          'clf__booster': ['gbtree', 'gblinear'],
+          # 'clf__objective': ['multi:softmax', 'rank:pairwise', 'rank:ndcg', 'rank:map', 'reg:gamma', 'reg:tweedie'],
+          'clf__booster': ['gbtree', 'gblinear', 'dart'],
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
           # #'clf__max_delta_step': [],
@@ -143,11 +143,15 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
       'XGB': XGBRegressor(),
   }
 
-  for trait in ['O', 'C']:#, 'E', 'A', 'N']:
+  for trait in ['O', 'C', 'E', 'A', 'N']:
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
-    gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
-                    n_jobs=-1, cv=3, verbose=0, return_train_score=False, error_score='raise')
+    if group == 'group':
+          gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
+                          n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
+    else:
+      gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
+                      n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
 
     result = []
     result.append({'trait': trait})
@@ -164,7 +168,6 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
     result.to_csv(title, mode='a', index=False)
 
 
-
 if __name__ == "__main__":
   #Enter csv filePath/fileName: asdf
   #Enter random_seed: 0
@@ -175,11 +178,11 @@ if __name__ == "__main__":
 
   data = processData("training_data_participant",
                      "training_data_participant/siop_ml_train_participant.csv")
-  data.count()
+  #data.count()
 
-  for x in [0.05, 0.1, 0.25]:
-    for y in ['individual', 'group']:
-      print("Tuning with test_size={} & {}".format(x,y))
+  for y in ['group']:  # 'individual',
+    for x in [0.05, 0.1, 0.25]:
+      print("Tuning with test_size={} & {}".format(x, y))
       X_train, X_test, y_train, y_test = test_split(
-        'training_data_participant/siop_ml_train_participant.csv', random_seed, x, y)
+          'training_data_participant/siop_ml_train_participant.csv', random_seed, x, y)
       param_tuning(X_train, X_test, y_train, y_test, y)
