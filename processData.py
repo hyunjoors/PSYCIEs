@@ -12,8 +12,12 @@ from operator import itemgetter
 
 class processData:
 
-    def count(folderPath, filePath):
-        data_train = pd.read_csv(filePath)
+    def __init__(self, folderPath, filePath):
+        self.folderPath = folderPath
+        self.filePath = filePath
+
+    def count(self):
+        data_train = pd.read_csv(self.filePath)
 
         respondant_id = data_train.iloc[:, 1:1]
         X = data_train.iloc[:, 1:6]
@@ -72,7 +76,7 @@ class processData:
             parsed_user_grouped_answer_list.append(word_count_list)
         
         ocean = ["A", "C", "E", "N", "O"]
-        csvFile = folderPath + '/individual_Count.csv'
+        csvFile = self.folderPath + '/individual_Count.csv'
         with open(csvFile, 'w') as output_file:
             for i in range(n):
                 for j in range(5):
@@ -83,16 +87,10 @@ class processData:
                     output_file.write("\n")
                 output_file.write("\n")
 
-        csvFile = folderPath + '/grouped_Counts.csv' 
+        csvFile = self.folderPath + '/grouped_Counts.csv'
         with open(csvFile, 'w') as output_file:
             for i in range(n):
                 for key in parsed_user_grouped_answer_list[i].keys():
                     output_file.write("%s,%d," % (key, parsed_user_grouped_answer_list[i][key]))
                 output_file.write("\n")
         return parsed_user_answer_list, parsed_user_grouped_answer_list
-
-
-    def summarize(dictionaryType):
-        for i in range(5):
-            print("blah")
-        return

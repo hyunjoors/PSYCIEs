@@ -98,7 +98,7 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
           # 'clf__n_estimators': [],
           # 'clf__silent': [],
           # 'clf__objective': ['binary:logistic', 'multi:softmax'],
-          # 'clf__booster': ['gbtree', 'gblinear'],
+          'clf__booster': ['gbtree', 'gblinear'],
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
           # #'clf__max_delta_step': [],
@@ -173,8 +173,9 @@ if __name__ == "__main__":
   # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
   # because the individual's document has only one string.
 
-  data = processData()
-  data.count('training_data_participant', 'training_data_participant/siop_ml_train_participant.csv')
+  data = processData("training_data_participant",
+                     "training_data_participant/siop_ml_train_participant.csv")
+  data.count()
 
   for x in [0.05, 0.1, 0.25]:
     for y in ['individual', 'group']:
