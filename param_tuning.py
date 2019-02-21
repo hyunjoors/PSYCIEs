@@ -64,7 +64,7 @@ def test_split(filePath, seed, test_size, group):
   # calculate idf
 
 
-def param_tuning(X_train, X_test, y_train, y_test, group):
+def param_tuning(X_train, X_test, y_train, y_test, group, test_size):
 
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
       # (1, 1), (1, 3), (2, 2), ...
@@ -73,7 +73,7 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
       'tfidf__use_idf': [True, False],
       'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'svd__random_state': [random_seed],
-      'svd__n_components': [1, 5, 10, 40, 50],  # np.arange(1,51,2)),
+      'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],  # np.arange(1,51,2)),
   }
 
   # list of dictionaries
@@ -147,7 +147,7 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
-          gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
+      gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
                           n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
@@ -159,6 +159,8 @@ def param_tuning(X_train, X_test, y_train, y_test, group):
     for key, value in gridSearch.best_['params'].items():
       result.append({key: value})
     result.append({'r': gridSearch.best_['r']})
+    result.append({'grouped':group})
+    result.append({'test_size':test_size})
     result = {k: v for d in result for k, v in d.items()}
     result = pd.DataFrame(result)
 
@@ -180,9 +182,9 @@ if __name__ == "__main__":
                      "training_data_participant/siop_ml_train_participant.csv")
   #data.count()
 
-  for y in ['group']:  # 'individual',
+  for y in ['individual', 'group']:
     for x in [0.05, 0.1, 0.25]:
       print("Tuning with test_size={} & {}".format(x, y))
       X_train, X_test, y_train, y_test = test_split(
           'training_data_participant/siop_ml_train_participant.csv', random_seed, x, y)
-      param_tuning(X_train, X_test, y_train, y_test, y)
+      param_tuning(X_train, X_test, y_train, y_test, y, x)
