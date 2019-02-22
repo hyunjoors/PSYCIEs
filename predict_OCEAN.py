@@ -100,14 +100,15 @@ def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 
         ])
 
         print("Predicting Score for %s" % trait)
-        gridSearch = GridSearchCV(pipeline, OCEAN_params_dict[trait])
+        gridSearch = GridSearchCV(pipeline, OCEAN_params_dict[trait],
+                                    n_jobs=-1, cv=3, verbose=1, return_train_score=False, error_score='raise')
         
         if group == 'group':
             gridSearch.fit(X_train, y_train[trait])
             y_pred = pd.DataFrame(gridSearch.predict(X_dev))
         else:
-            pipeline.fit(X_train[trait], y_train[trait])
-            y_pred = pd.DataFrame(pipeline.predict(X_dev[trait]))
+            gridSearch.fit(X_train[trait], y_train[trait])
+            y_pred = pd.DataFrame(gridSearch.predict(X_dev[trait]))
 
         
         header = trait + '_Pred'
@@ -121,9 +122,9 @@ if __name__ == "__main__":
     # X_train, X_test, y_train, y_test = test_split(
     #     'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='ind')
     X_train, y_train = test_split(
-        'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='group')
+        'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='ind')
     X_dev, y_dev = processData_dev(
-        'dev_data_participant/siop_ml_dev_participant.csv', group='group')
+        'dev_data_participant/siop_ml_dev_participant.csv', group='ind')
 
     OCEAN_model_dict = {
         'O': XGBRegressor(),
@@ -191,4 +192,4 @@ if __name__ == "__main__":
        },
     }
 
-    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'group')
+    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'ind')
