@@ -7,6 +7,7 @@ import pandas as pd
 import sklearn.metrics
 import csv
 import xgboost as xgb
+import json
 
 from pandas import Series
 from sklearn import datasets
@@ -48,11 +49,14 @@ def test_split(filePath, seed, test_size, group, question):
   if (group == 'group'):
     # put all five responses into one "paragraph"
     X = X.stack().groupby(level=0).apply(' '.join)
-
-  if (question == True):
-    # add questions to all entry
-    for trait in ['O', 'C', 'E', 'A', 'N']:
-      X[trait] = X[trait].apply(lambda x: "{} {}".format(questions[trait], x))
+    if (question == True):
+      # add questions to all entry
+      X = X.apply(lambda x: "{} {}".format(question, x))
+  else:
+    if (question == True):
+      # add questions to all entry
+      for trait in ['O', 'C', 'E', 'A', 'N']:
+        X[trait] = X[trait].apply(lambda x: "{} {}".format(questions[trait], x))
 
   X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                       random_state=seed,
@@ -70,16 +74,17 @@ def test_split(filePath, seed, test_size, group, question):
   # calculate idf
 
 
-def param_tuning(X_train, X_test, y_train, y_test, group, test_size):
+def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
 
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
       # (1, 1), (1, 3), (2, 2), ...
-      'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+      # 'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
       'tfidf__stop_words': [None, 'english'],
       'tfidf__use_idf': [True, False],
       'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'svd__random_state': [random_seed],
-      'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],  # np.arange(1,51,2)),
+      'svd__n_components': [5, 10, 30, 50, 70, 90, 100],  # For LSA, a value of 100 is recommended.
+      # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
   }
 
   # list of dictionaries
@@ -99,17 +104,18 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size):
           'clf__shrinking': [True, False],
       },
       'XGB': {
-          'clf__max_depth': [3, 4, 5, 6, 7, 8, 9, 10],
-          # 'clf__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
+          'clf__max_depth': [3, 4, 6, 8, 10],
+          'clf__learning_rate': [0.01, 0.1, 0.2, 0.3],
           # 'clf__n_estimators': [],
           # 'clf__silent': [],    'multi:softmax',
-          'clf__objective': ['rank:pairwise', 'rank:ndcg', 'rank:map', 'reg:gamma', 'reg:tweedie'],
+          # 2/26 11:41PM running rank:pairwise
+          'clf__objective': ['rank:pairwise'],#, 'rank:ndcg', 'rank:map', 'reg:gamma', 'reg:tweedie'],
           'clf__booster': ['gbtree', 'gblinear', 'dart'],
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
           # #'clf__max_delta_step': [],
-          'clf__subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
-          'clf__colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+          'clf__subsample': [0.5, 0.6, 0.8, 1],
+          'clf__colsample_bytree': [0.5, 0.6, 0.8, 1],
           # #'clf__colsample_bylevel': [], # subsample & bytree will do the job
           # # can be used in case of very high dimensionality
           # 'clf__reg_alpha': [0],
@@ -149,31 +155,39 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size):
       'XGB': XGBRegressor(),
   }
 
-  for trait in ['O', 'C', 'E', 'A', 'N']:
+  for trait in ['O', 'C']:#, 'E', 'A', 'N']:
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
       gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait], 
-                      n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
+                      n_jobs=8, cv=5, verbose=1, return_train_score=False, error_score='raise', iid=True)
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
-                      n_jobs=5, cv=3, verbose=1, return_train_score=False, error_score='raise')
+                      n_jobs=8, cv=5, verbose=1, return_train_score=False, error_score='raise', iid=True)
 
     result = []
     result.append({'trait': trait})
-    result.append({'estimator': gridSearch.best_['estimator']})
+    result.append({'grouped':group})
+    result.append({'test_size':test_size})
+    result.append({'question': question})
+    #result.append({'estimator': gridSearch.best_['estimator']})
+    # esitmator is estimator 2/27 14:59
     for key, value in gridSearch.best_['params'].items():
       result.append({key: value})
     result.append({'r': gridSearch.best_['r']})
-    result.append({'grouped':group})
-    result.append({'test_size':test_size})
     result = {k: v for d in result for k, v in d.items()}
-    result = pd.DataFrame(result)
+    # result = pd.DataFrame(result)
 
     print('Best Hyper-Parameter Result for trait {}\n{}\n'.format(trait, result))
 
-    title = "tuningResult_" + group + ".csv"
-    result.to_csv(title, mode='a', index=False)
+    # title = "tuningResult_" + group + ".csv"
+    # result.to_csv(title, mode='a', index=False)
+
+    file_name = "tuningResult_" + trait + ".json"
+    #result.to_json(file_name, orient='records')
+    with open(file_name, 'a') as fp:
+      json.dump(result, fp, sort_keys=True, indent=4)
+    
 
 
 if __name__ == "__main__":
@@ -191,8 +205,8 @@ if __name__ == "__main__":
   for y in ['individual', 'group']:
     for x in [0.05, 0.1, 0.25]:
       for question in [True, False]:
-        print("Tuning with test_size={} & {}".format(x, y))
+        print("Tuning with test_size={} & grouping={} & question={}".format(x, y, question))
         X_train, X_test, y_train, y_test = test_split(
             'training_data_participant/siop_ml_train_participant.csv', random_seed, x, y, question)
         #print(X_train)
-        param_tuning(X_train, X_test, y_train, y_test, y, x)
+        param_tuning(X_train, X_test, y_train, y_test, y, x, question)
