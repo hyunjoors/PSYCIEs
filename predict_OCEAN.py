@@ -1,5 +1,4 @@
 from EstimatorSelectionHelper import EstimatorSelectionHelper
-from processData import processData
 
 import numpy as np
 import numpy.random as rand
@@ -47,13 +46,13 @@ def test_split(filePath, seed, test_size, group):
     # put all five responses into one "paragraph"
     X = X.stack().groupby(level=0).apply(' '.join)
 
-#   X_train, X_test, y_train, y_test = train_test_split(X, y,
-#                                                       random_state=seed,
-#                                                       test_size=test_size,
-#                                                       shuffle=True)
+  X_train, X_test, y_train, y_test = train_test_split(X, y,
+                                                      random_state=seed,
+                                                      test_size=test_size,
+                                                      shuffle=True)
 
-  #return (X_train, X_test, y_train, y_test)
-  return (X, y)
+  return (X_train, X_test, y_train, y_test)
+  #return (X, y)
 
 
 def processData_dev(filePath, group):
@@ -92,7 +91,7 @@ def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 
     file = "siop_ml_dev_submission_format.csv"
     result = pd.read_csv(file, header=0)
 
-    for trait in ['O', 'C', 'E', 'A', 'N']:
+    for trait in ['O']:#, 'C', 'E', 'A', 'N']:
         pipeline = Pipeline([
             ('tfidf', TfidfVectorizer()),
             ('svd', TruncatedSVD()),
@@ -101,7 +100,7 @@ def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 
 
         print("Predicting Score for %s" % trait)
         gridSearch = GridSearchCV(pipeline, OCEAN_params_dict[trait],
-                                    n_jobs=-1, cv=3, verbose=1, return_train_score=False, error_score='raise')
+                                    n_jobs=8, cv=5, verbose=1, return_train_score=False, error_score='raise', iid=True)
         
         if group == 'group':
             gridSearch.fit(X_train, y_train[trait])
@@ -119,13 +118,6 @@ def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 
     result.to_csv(file, index=False)
 
 if __name__ == "__main__":
-    # X_train, X_test, y_train, y_test = test_split(
-    #     'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='ind')
-    X_train, y_train = test_split(
-        'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='ind')
-    X_dev, y_dev = processData_dev(
-        'dev_data_participant/siop_ml_dev_participant.csv', group='ind')
-
     OCEAN_model_dict = {
         'O': XGBRegressor(),
         'C': XGBRegressor(),
@@ -136,15 +128,21 @@ if __name__ == "__main__":
 
     OCEAN_params_dict= {
        'O': {
-           'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
-           'tfidf__stop_words': [None, 'english'],
-           'tfidf__use_idf': [True, False],
-           'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
-           'svd__random_state': [random_seed],
-           # np.arange(1,51,2)),
-           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
+            #'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+            'tfidf__stop_words': [None],
+            'tfidf__use_idf': [True],
+            'tfidf__max_df': (0.1, 1.0),
+            'svd__random_state': [random_seed],
+            # np.arange(1,51,2)),
+            'svd__n_components': [10],
 
-           'clf__booster': ['gbtree', 'dart'],
+            'clf__booster': ['gbtree'],
+            'clf__max_depth': [6],
+            #'clf__learning_rate': [0.01, 0.1, 0.2, 0.3],
+            'clf__objective': ['rank:pairwise'],#, 'rank:ndcg', 'rank:map', 'reg:gamma', 'reg:tweedie'],
+            'clf__booster': ['gbtree', 'gblinear', 'dart'],
+            'clf__subsample': [0.5],
+            'clf__colsample_bytree': [0.6],
        },
        'C': {
            'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
@@ -192,4 +190,26 @@ if __name__ == "__main__":
        },
     }
 
-    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'ind')
+    # X_train, X_test, y_train, y_test = test_split(
+    #     'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='ind')
+    
+    X_dev, y_dev = processData_dev(
+        'dev_data_participant/siop_ml_dev_participant.csv', group='ind')
+
+    # "grouped": "individual",
+    # "question": false,
+    # "r": 0.29264142874367505,
+    # "svd__random_state": 8424,
+    # "test_size": 0.05,
+    # "trait": "O"
+
+    # print("with test_size = 0.05")
+    # X_train, X_test, y_train, y_test = test_split(
+    #     'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0.05, group='ind')
+    # print(X_test)
+    # predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'ind')
+    print("with entire training data")
+    X_train, X_test, y_train, y_test = test_split(
+        'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0, group='ind')
+    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict,
+                  OCEAN_params_dict, 'ind')
