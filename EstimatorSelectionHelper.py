@@ -60,7 +60,6 @@ class EstimatorSelectionHelper:
                 self.best_['y_pred'] = y_pred
             
             print("Current Best")
-            print(self.best_['estimator'])
             print(self.best_['params'])
             print(self.best_['r'])
             
