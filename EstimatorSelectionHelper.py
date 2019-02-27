@@ -36,7 +36,6 @@ class EstimatorSelectionHelper:
             print("\tRunning GridSearchCV for %s." % key)
             model = self.models[key]
             params = self.params[key]
-            print(params)
 
             #Pipeline the estimators
             pipeline = Pipeline([
@@ -44,23 +43,22 @@ class EstimatorSelectionHelper:
                 ('svd', TruncatedSVD()),
                 ('clf', model),
             ])
-            
+
             gs = GridSearchCV(pipeline, params, **grid_kwargs)
             gs.fit(X_train, y_train)
 
             print("\tPredicting for %s." % key)
             y_pred = gs.predict(X_test)
             r = np.corrcoef(y_pred, y_test)[0, 1]
-            
-            
+
             if (abs(r) > abs(max_r)):
                 self.best_['estimator'] = model
                 self.best_['params'] = gs.best_params_
                 self.best_['r'] = r
                 self.best_['y_pred'] = y_pred
-            
+
             print("Current Best")
-            print(self.best_['params'])
+            #print(self.best_['params'])
             print(self.best_['r'])
-            
+
             print('\tTuning for %s Done.' % key)
