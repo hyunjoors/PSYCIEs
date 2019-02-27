@@ -1,5 +1,5 @@
 from EstimatorSelectionHelper import EstimatorSelectionHelper
-from processData import processData
+# from processData import processData
 
 import numpy as np
 import numpy.random as rand
@@ -24,9 +24,10 @@ from xgboost import XGBRegressor
 random_seed = 8424
 
 
-def test_split(filePath, seed, test_size, group):
+def test_split(filePath, seed, test_size, group, question):
   # Training Data Setup
   data_train = pd.read_csv(filePath)
+  questions = pd.read_csv("Questions.csv")
 
   X = data_train.iloc[:, 1:6]
   y = data_train.iloc[:, 6:11]
@@ -47,6 +48,11 @@ def test_split(filePath, seed, test_size, group):
   if (group == 'group'):
     # put all five responses into one "paragraph"
     X = X.stack().groupby(level=0).apply(' '.join)
+
+  if (question == True):
+    # add questions to all entry
+    for trait in ['O', 'C', 'E', 'A', 'N']:
+      X[trait] = X[trait].apply(lambda x: "{} {}".format(questions[trait], x))
 
   X_train, X_test, y_train, y_test = train_test_split(X, y,
                                                       random_state=seed,
@@ -93,17 +99,17 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size):
           'clf__shrinking': [True, False],
       },
       'XGB': {
-          # 'clf__max_depth': [3, 4, 5, 6, 7, 8, 9, 10],
+          'clf__max_depth': [3, 4, 5, 6, 7, 8, 9, 10],
           # 'clf__learning_rate': [0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3],
           # 'clf__n_estimators': [],
-          # 'clf__silent': [],
-          # 'clf__objective': ['multi:softmax', 'rank:pairwise', 'rank:ndcg', 'rank:map', 'reg:gamma', 'reg:tweedie'],
+          # 'clf__silent': [],    'multi:softmax',
+          'clf__objective': ['rank:pairwise', 'rank:ndcg', 'rank:map', 'reg:gamma', 'reg:tweedie'],
           'clf__booster': ['gbtree', 'gblinear', 'dart'],
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
           # #'clf__max_delta_step': [],
-          # 'clf__subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
-          # 'clf__colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+          'clf__subsample': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
+          'clf__colsample_bytree': [0.5, 0.6, 0.7, 0.8, 0.9, 1],
           # #'clf__colsample_bylevel': [], # subsample & bytree will do the job
           # # can be used in case of very high dimensionality
           # 'clf__reg_alpha': [0],
@@ -178,13 +184,15 @@ if __name__ == "__main__":
   # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
   # because the individual's document has only one string.
 
-  data = processData("training_data_participant",
-                     "training_data_participant/siop_ml_train_participant.csv")
-  #data.count()
+  # data = processData("training_data_participant",
+  #                    "training_data_participant/siop_ml_train_participant.csv")
+  # #data.count()
 
   for y in ['individual', 'group']:
     for x in [0.05, 0.1, 0.25]:
-      print("Tuning with test_size={} & {}".format(x, y))
-      X_train, X_test, y_train, y_test = test_split(
-          'training_data_participant/siop_ml_train_participant.csv', random_seed, x, y)
-      param_tuning(X_train, X_test, y_train, y_test, y, x)
+      for question in [True, False]:
+        print("Tuning with test_size={} & {}".format(x, y))
+        X_train, X_test, y_train, y_test = test_split(
+            'training_data_participant/siop_ml_train_participant.csv', random_seed, x, y, question)
+        #print(X_train)
+        param_tuning(X_train, X_test, y_train, y_test, y, x)

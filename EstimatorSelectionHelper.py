@@ -36,6 +36,7 @@ class EstimatorSelectionHelper:
             print("\tRunning GridSearchCV for %s." % key)
             model = self.models[key]
             params = self.params[key]
+            print(params)
 
             #Pipeline the estimators
             pipeline = Pipeline([
