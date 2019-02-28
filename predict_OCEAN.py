@@ -100,7 +100,7 @@ def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 
 
         print("Predicting Score for %s" % trait)
         gridSearch = GridSearchCV(pipeline, OCEAN_params_dict[trait],
-                                    n_jobs=8, cv=5, verbose=1, return_train_score=False, error_score='raise', iid=True)
+                                    n_jobs=1, cv=5, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
         
         if group == 'group':
             gridSearch.fit(X_train, y_train[trait])
@@ -211,5 +211,4 @@ if __name__ == "__main__":
     print("with entire training data")
     X_train, X_test, y_train, y_test = test_split(
         'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0, group='ind')
-    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict,
-                  OCEAN_params_dict, 'ind')
+    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'ind')
