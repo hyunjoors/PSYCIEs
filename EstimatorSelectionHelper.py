@@ -51,7 +51,7 @@ class EstimatorSelectionHelper:
             y_pred = gs.predict(X_test)
             r = np.corrcoef(y_pred, y_test)[0, 1]
 
-            if (abs(r) > abs(max_r)):
+            if (r > max_r):
                 self.best_['estimator'] = model
                 self.best_['params'] = gs.best_params_
                 self.best_['r'] = r
