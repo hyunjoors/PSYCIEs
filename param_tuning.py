@@ -161,7 +161,7 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       'XGB': XGBRegressor(),
   }
 
-  for trait in ['O', 'C']:  # , 'E', 'A', 'N']:
+  for trait in ['O', 'C', 'N']:  # , 'E', 'A', 'N']:
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
@@ -203,12 +203,12 @@ if __name__ == "__main__":
   # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
   # because the individual's document has only one string.
 
-  # data = processData("training_data_participant",
+  # data = processData("training_dat,a_participant",
   #                    "training_data_participant/siop_ml_train_participant.csv")
   # #data.count()
 
-  for y in ['individual']: # 'individual', 
-      for question in [True]:
+  for y in ['individual', 'group']:
+      for question in [True, False]:
         print("Tuning with test_size={} & grouping={} & question={}".format(0.05, y, question))
         X_train, X_test, y_train, y_test = test_split(
             'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, y, question)
