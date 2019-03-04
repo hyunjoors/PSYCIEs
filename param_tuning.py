@@ -84,7 +84,8 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'svd__random_state': [random_seed],
       # For LSA, a value of 100 is recommended.
-      'svd__n_components': [5, 20, 40, 60, 80, 100],
+      'svd__n_components': [100],
+    #5, 20, 40, 60, 80,
       # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
   }
 
@@ -113,11 +114,12 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
           # count:poisson needs max_delta_step
           # rank:ndcg sometime gives no result
           # rank:map --> ValueError: Input contains NaN, infinity or a value too large for dtype('float32').
-          'clf__objective': ['reg:linear', 'count:poisson', 'survival:cox', 'rank:pairwise', 'reg:gamma',  'reg:tweedie'],
+          #'reg:linear', 'count:poisson', 'survival:cox', 'rank:pairwise', 'reg:gamma',  'reg:tweedie'
+          'clf__objective': ['count:poisson', 'survival:cox', 'rank:pairwise', 'reg:gamma',  'reg:tweedie'],
           'clf__booster': ['gbtree', 'gblinear', 'dart'],
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
-          'clf__max_delta_step': [0, 0.7, 4, 7, 10],
+          #'clf__max_delta_step': [0, 0.7, 4, 7, 10],
           'clf__subsample': [0.5, 0.6, 0.8, 1],
           'clf__colsample_bytree': [0.5, 0.6, 0.8, 1],
           # #'clf__colsample_bylevel': [], # subsample & bytree will do the job
@@ -205,8 +207,8 @@ if __name__ == "__main__":
   #                    "training_data_participant/siop_ml_train_participant.csv")
   # #data.count()
 
-  for y in ['group']: # 'individual', 
-      for question in [True, False]:
+  for y in ['individual']: # 'individual', 
+      for question in [True]:
         print("Tuning with test_size={} & grouping={} & question={}".format(0.05, y, question))
         X_train, X_test, y_train, y_test = test_split(
             'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, y, question)
