@@ -88,10 +88,10 @@ def processData_dev(filePath, group):
 
 def predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, group):
 
-    file = "siop_ml_dev_submission_format.csv"
+    file = "siop_ml_test_submission_format.csv"
     result = pd.read_csv(file, header=0)
 
-    for trait in ['O']:#, 'C', 'E', 'A', 'N']:
+    for trait in ['O', 'N']:#, 'C', 'E', 'A', 'N']:
         pipeline = Pipeline([
             ('tfidf', TfidfVectorizer()),
             ('svd', TruncatedSVD()),
@@ -123,12 +123,12 @@ if __name__ == "__main__":
         'C': XGBRegressor(),
         'E': XGBRegressor(),
         'A': XGBRegressor(),
-        'N': XGBRegressor(),
+        'N': LinearRegression(),
     }
 
     OCEAN_params_dict= {
        'O': {
-            #'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+            'tfidf__ngram_range': [(1, 1)],
             'tfidf__stop_words': [None],
             'tfidf__use_idf': [True],
             'tfidf__max_df': (0.1, 1.0),
@@ -178,15 +178,15 @@ if __name__ == "__main__":
            'clf__booster': ['gbtree', 'dart'],
        },
        'N': {
-           'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
-           'tfidf__stop_words': [None, 'english'],
-           'tfidf__use_idf': [True, False],
-           'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+           'tfidf__ngram_range': [(1, 3)],
+           'tfidf__stop_words': ['english'],
+           'tfidf__use_idf': [True],
+           #'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
            'svd__random_state': [random_seed],
            # np.arange(1,51,2)),
-           'svd__n_components': [1, 5, 10, 40, 50, 60, 70, 80, 90, 100],
+           'svd__n_components': [40],
 
-           'clf__booster': ['gbtree', 'dart'],
+           # 40	8424	TRUE	1, 3	English
        },
     }
 
@@ -195,6 +195,8 @@ if __name__ == "__main__":
     
     X_dev, y_dev = processData_dev(
         'dev_data_participant/siop_ml_dev_participant.csv', group='ind')
+    X_test, y_test = processData_dev(
+        'test_data/siop_ml_test_participant.csv', group='ind')
 
     # "grouped": "individual",
     # "question": false,
@@ -209,6 +211,6 @@ if __name__ == "__main__":
     # print(X_test)
     # predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'ind')
     print("with entire training data")
-    X_train, X_test, y_train, y_test = test_split(
+    X_train, X_temp, y_train, y_temp = test_split(
         'training_data_participant/siop_ml_train_participant.csv', seed=random_seed, test_size=0, group='ind')
-    predict_OCEAN(X_train, y_train, X_dev, OCEAN_model_dict, OCEAN_params_dict, 'ind')
+    predict_OCEAN(X_train, y_train, X_test, OCEAN_model_dict, OCEAN_params_dict, 'ind')

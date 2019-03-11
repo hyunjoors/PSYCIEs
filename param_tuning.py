@@ -84,7 +84,7 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
       'svd__random_state': [random_seed],
       # For LSA, a value of 100 is recommended.
-      'svd__n_components': [100],
+      'svd__n_components': [5, 20, 40, 60, 80, 100],
     #5, 20, 40, 60, 80,
       # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
   }
@@ -107,7 +107,7 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       },
       'XGB': {
           'clf__max_depth': [3, 4, 6, 8, 10],
-          'clf__learning_rate': [0.01, 0.1, 0.2, 0.3],
+          #'clf__learning_rate': [0.01, 0.1, 0.2, 0.3],
           # 'clf__n_estimators': [],
           # 'clf__silent': [],
           # ‘reg:logistic’ label must be in [0,1] for logistic regression
@@ -120,8 +120,8 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
           #'clf__max_delta_step': [0, 0.7, 4, 7, 10],
-          'clf__subsample': [0.5, 0.6, 0.8, 1],
-          'clf__colsample_bytree': [0.5, 0.6, 0.8, 1],
+          #'clf__subsample': [0.5, 0.6, 0.8, 1],
+          #'clf__colsample_bytree': [0.5, 0.6, 0.8, 1],
           # #'clf__colsample_bylevel': [], # subsample & bytree will do the job
           # # can be used in case of very high dimensionality
           # 'clf__reg_alpha': [0],
@@ -161,15 +161,15 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       'XGB': XGBRegressor(),
   }
 
-  for trait in ['O', 'C', 'N']:  # , 'E', 'A', 'N']:
+  for trait in ['O']:#, 'C', 'N']:  # , 'E', 'A', 'N']:
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
       gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
-                      n_jobs=1, cv=5, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+                      n_jobs=-1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
-                      n_jobs=1, cv=5, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+                      n_jobs=-1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
 
     result = []
     result.append({'trait': trait})
@@ -207,7 +207,7 @@ if __name__ == "__main__":
   #                    "training_data_participant/siop_ml_train_participant.csv")
   # #data.count()
 
-  for y in ['individual', 'group']:
+  for y in ['group']:
       for question in [True, False]:
         print("Tuning with test_size={} & grouping={} & question={}".format(0.05, y, question))
         X_train, X_test, y_train, y_test = test_split(
