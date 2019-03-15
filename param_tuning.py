@@ -81,10 +81,10 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       # 'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
       'tfidf__stop_words': [None, 'english'],
       'tfidf__use_idf': [True, False],
-      'tfidf__max_df': (0.25, 0.5, 0.75, 1.0),
+      'tfidf__max_df': (0.25, 0.5),
       'svd__random_state': [random_seed],
       # For LSA, a value of 100 is recommended.
-      'svd__n_components': [5, 20, 40, 60, 80, 100],
+      'svd__n_components': [5, 40, 100],
     #5, 20, 40, 60, 80,
       # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
   }
@@ -106,8 +106,8 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
           'clf__shrinking': [True, False],
       },
       'XGB': {
-          'clf__max_depth': [3, 4, 6, 8, 10],
-          #'clf__learning_rate': [0.01, 0.1, 0.2, 0.3],
+          'clf__max_depth': [3, 6, 10],
+          'clf__learning_rate': [0.01, 0.1, 0.3],
           # 'clf__n_estimators': [],
           # 'clf__silent': [],
           # ‘reg:logistic’ label must be in [0,1] for logistic regression
@@ -119,9 +119,9 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
           'clf__booster': ['gbtree', 'gblinear', 'dart'],
           # 'clf__gamma': [0],  # Needs to be tuned
           # 'clf__min_child_weight': [1],
-          #'clf__max_delta_step': [0, 0.7, 4, 7, 10],
-          #'clf__subsample': [0.5, 0.6, 0.8, 1],
-          #'clf__colsample_bytree': [0.5, 0.6, 0.8, 1],
+          'clf__max_delta_step': [0, 0.7, 4, 10],
+          'clf__subsample': [0.5, 1],
+          'clf__colsample_bytree': [0.5, 1],
           # #'clf__colsample_bylevel': [], # subsample & bytree will do the job
           # # can be used in case of very high dimensionality
           # 'clf__reg_alpha': [0],
