@@ -22,7 +22,7 @@ from sklearn.ensemble import AdaBoostClassifier, GradientBoostingRegressor
 from xgboost import XGBRegressor
 
 
-random_seed = 8424
+random_seed = 42 # Guide to Galaxy
 
 
 def test_split(filePath, seed, test_size, group, question):
@@ -59,36 +59,24 @@ def test_split(filePath, seed, test_size, group, question):
         X[trait] = X[trait].apply(
             lambda x: "{} {}".format(questions[trait], x))
 
-  X_train, X_test, y_train, y_test = train_test_split(X, y,
-                                                      random_state=seed,
-                                                      test_size=test_size,
-                                                      shuffle=True)
+  X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=seed, test_size=test_size, shuffle=True)
 
   return (X_train, X_test, y_train, y_test)
 
-  # relationshp between question and answers
-  # most common words and least common word for each answers
-  # Doc to Vect / word to vect
 
-  # Naive Bayes
-  # based on the OCEAN score
-  # calculate idf
 
 def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
-
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
-      # 'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
+      'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
       'tfidf__stop_words': [None, 'english'],
       'tfidf__use_idf': [True, False],
-      'tfidf__max_df': (0.25, 0.5),
+      'tfidf__max_df': (0, 0.25, 0.5, 1.0),
+      'tfidf__min_df': (0, 0.25, 0.5, 1.0),
       'svd__random_state': [random_seed],
-      # For LSA, a value of 100 is recommended.
-      'svd__n_components': [5, 40, 50, 100],
+      'svd__n_components': [5, 40, 50, 100], # For LSA, a value of 100 is recommended.
     #5, 20, 40, 60, 80,
       # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
   }
-
-  # list of dictionaries
   parameter_dict = {
       'LinearRegression': {
           'clf__fit_intercept': [True, False],
@@ -165,46 +153,27 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
       gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
-                      n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+                      cv = 5, n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
-                      n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+                      cv=5, n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
 
     result = []
+    result.append({'estimator': gridSearch.best_['estimator']})
     result.append({'trait': trait})
     result.append({'grouped': group})
     result.append({'test_size': test_size})
     result.append({'question': question})
-    #result.append({'estimator': gridSearch.best_['estimator']})
-    # esitmator is estimator 2/27 14:59
     for key, value in gridSearch.best_['params'].items():
       result.append({key: value})
     result.append({'r': gridSearch.best_['r']})
     result = {k: v for d in result for k, v in d.items()}
-    # result = pd.DataFrame(result)
-
-    #print('Best Hyper-Parameter Result for trait {}\n{}\n'.format(trait, result))
-
-    # title = "tuningResult_" + group + ".csv"
-    # result.to_csv(title, mode='a', index=False)
 
     file_name = "tuningResult_" + trait + ".json"
-    #result.to_json(file_name, orient='records')
     with open(file_name, 'a') as fp:
       json.dump(result, fp, sort_keys=True, indent=4)
 
-
 if __name__ == "__main__":
-  #Enter csv filePath/fileName: asdf
-  #Enter random_seed: 0
-  #Enter test_size(0-1): 0
-
-  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
-  # because the individual's document has only one string.
-
-  # data = processData("training_dat,a_participant",
-  #                    "training_data_participant/siop_ml_train_participant.csv")
-  # #data.count()
 
   for y in ['group', 'ind']:
       for question in [True, False]:

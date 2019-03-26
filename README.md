@@ -31,3 +31,15 @@ For each trait, please specify the best estimator.
 
 2. OCEAN_params_dict  
 For each trait, please specify the parameters for a corresponding model.
+
+  # relationshp between question and answers
+  # most common words and least common word for each answers
+  # Doc to Vect / word to vect
+
+  # Naive Bayes
+  # based on the OCEAN score
+  # calculate idf
+
+
+  # 'individual' has an issue with ValueError: empty vocabulary; perhaps the documents only contain stop words
+  # because the individual's document has only one string.
