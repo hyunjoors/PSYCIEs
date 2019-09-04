@@ -65,6 +65,7 @@ def test_split(filePath, seed, test_size, group, question):
 
 
 
+
 def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
       'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3), (2, 2), (2, 3)],
@@ -73,7 +74,12 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
       'tfidf__max_df': (0, 0.25, 0.5, 1.0),
       'tfidf__min_df': (0, 0.25, 0.5, 1.0),
       'svd__random_state': [random_seed],
+<<<<<<< HEAD
       'svd__n_components': [5, 40, 50, 100], # For LSA, a value of 100 is recommended.
+=======
+      # For LSA, a value of 100 is recommended.
+      'svd__n_components': [5, 40, 100],
+>>>>>>> parent of 5bf654a... 3/26 10:51
     #5, 20, 40, 60, 80,
       # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
   }
@@ -143,20 +149,27 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
     parameter_dict[key].update(list(sub_parameter_dict.items()))
 
   clf_dict = {
-      'LinearRegression': LinearRegression(),
+      #'LinearRegression': LinearRegression(),
       #'SVR': SVR(),
-      #'XGB': XGBRegressor(),
+      'XGB': XGBRegressor(),
   }
 
-  for trait in ['O', 'C', 'E', 'A', 'N']:
+  for trait in ['O']:#, 'C', 'N']:  # , 'E', 'A', 'N']:
     print("Hyper-Parameter Tuning for %s" % trait)
     gridSearch = EstimatorSelectionHelper(clf_dict, parameter_dict)
     if group == 'group':
       gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
+<<<<<<< HEAD
                       cv = 5, n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
                       cv=5, n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+=======
+                      n_jobs=-1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+    else:
+      gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
+                      n_jobs=-1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+>>>>>>> parent of 5bf654a... 3/26 10:51
 
     result = []
     result.append({'estimator': gridSearch.best_['estimator']})
@@ -175,9 +188,9 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
 
 if __name__ == "__main__":
 
-  for y in ['group', 'ind']:
+  for y in ['group']:
       for question in [True, False]:
         print("Tuning with test_size={} & grouping={} & question={}".format(0.05, y, question))
         X_train, X_test, y_train, y_test = test_split(
-            'rand_train_data.csv', random_seed, 0.05, y, question)
+            'training_data_participant/siop_ml_train_participant.csv', random_seed, 0.05, y, question)
         param_tuning(X_train, X_test, y_train, y_test, y, 0.05, question)
