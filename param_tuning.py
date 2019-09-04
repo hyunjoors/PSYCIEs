@@ -65,6 +65,11 @@ def test_split(filePath, seed, test_size, group, question):
 
 
 
+<<<<<<< HEAD
+=======
+
+def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
+>>>>>>> parent of 5bf654a... 3/26 10:51
 
 def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
   sub_parameter_dict = {  # parameters for vect, tfidf, svd
@@ -79,6 +84,9 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
 =======
       # For LSA, a value of 100 is recommended.
       'svd__n_components': [5, 40, 100],
+<<<<<<< HEAD
+>>>>>>> parent of 5bf654a... 3/26 10:51
+=======
 >>>>>>> parent of 5bf654a... 3/26 10:51
     #5, 20, 40, 60, 80,
       # excluded 1 because decomposing down to 1 is non-sense in analyzing the words
@@ -160,15 +168,21 @@ def param_tuning(X_train, X_test, y_train, y_test, group, test_size, question):
     if group == 'group':
       gridSearch.tune(X_train, y_train[trait], X_test, y_test[trait],
 <<<<<<< HEAD
+<<<<<<< HEAD
                       cv = 5, n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
                       cv=5, n_jobs=1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
 =======
+=======
+>>>>>>> parent of 5bf654a... 3/26 10:51
                       n_jobs=-1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
     else:
       gridSearch.tune(X_train[trait], y_train[trait], X_test[trait], y_test[trait],
                       n_jobs=-1, verbose=1, scoring='r2', return_train_score=False, error_score='raise', iid=True)
+<<<<<<< HEAD
+>>>>>>> parent of 5bf654a... 3/26 10:51
+=======
 >>>>>>> parent of 5bf654a... 3/26 10:51
 
     result = []
