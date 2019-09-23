@@ -67,8 +67,8 @@ class feature_selection:
     # maintain word order to a certain extent.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def bag_of_word(input_data):
-        vectorizer = TfidfVectorizer()
+    def bag_of_word(input_data, param):
+        vectorizer = TfidfVectorizer(param)
         bag_of_word_matrix = vectorizer.fit_transform(input_data)
 
         return bag_of_word_matrix
@@ -83,7 +83,9 @@ class feature_selection:
     # using vectors.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def doc2vec(input_data):
+    def doc2vec(input_data, param):
+        vectorizer = Doc2Vec(dm=0, vector_size=vectorsize, hs=0, negative=5, min_count=2, alpha=0.065, sample=0, min_alpha=0.065)
+        vectorizer.build_vocab()
         
         return doc2vec_matrix
 
@@ -94,8 +96,9 @@ class feature_selection:
     ###################################################################################################################
     # DTM (Document Term Matrix)
     # Count the frequency of each token (word) that occur in a collection or individual document.
+    # REFER: R
     ###################################################################################################################
-    def dtm(input_data):
+    def dtm(input_data, param):
         
         return dtmd_matrix
 
@@ -108,7 +111,7 @@ class feature_selection:
     # Sentiment Analysis is used to extract and identify subjective information related to the emotion, such as
     # negation, amplification, profanity, joy, fear and surprise, behind the text response.
     ###################################################################################################################
-    def sentiment_analysis(input_data):
+    def sentiment_analysis(input_data, param):
         
         return sentiment_analysis_matrix
 
@@ -121,7 +124,7 @@ class feature_selection:
     # ELMo is a deep contextualized word representation of text documents. It represents each word in a document
     # according to its context within the entire document, while implementing a neural-network.
     ###################################################################################################################
-    def ELMo(input_data):
+    def ELMo(input_data, param):
         
         return ELMo_matrix
 
@@ -134,7 +137,7 @@ class feature_selection:
     # Lexical diversity is calculated using documents’ multiple indices, which are calculated as the ratio between the
     # number of types of tokens and number of tokens.
     ###################################################################################################################
-    def lexical_diversity(input_data):
+    def lexical_diversity(input_data, param):
         
         return lexical_diversity_matrix
 
@@ -148,7 +151,7 @@ class feature_selection:
     # text’s complexity. Complexity is measured using attributes such as word length, sentence lengths, and syllable
     # counts.
     ###################################################################################################################
-    def readability(input_data):
+    def readability(input_data, param):
         
         return readability_matrix
 
@@ -161,6 +164,6 @@ class feature_selection:
     # A text mining tool used to find semantic structure in a body of text to find the different topics in a collection
     # of documents.
     ###################################################################################################################
-    def topic_modeling(input_data):
+    def topic_modeling(input_data, param):
         
         return topic_modeling_matrix
