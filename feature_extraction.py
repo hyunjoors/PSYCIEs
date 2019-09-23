@@ -39,12 +39,6 @@ import sys
 # Helper functions
 # These functions are not the major feature extracting functions. (e.g., clean_text, lemma below)
 #######################################################################################################################
-# Pre-processing (not removing stopwords, no lemma, etc.)
-def clean_text(text):
-    text = re.sub(r'[^a-zA-Z]', ' ', text)  # only keep english words/letters
-    words = text.lower().split()  # lowercase
-    return ' '.join(words)
-
 # Further clean text using wordnetlemmatizer
 lem = WordNetLemmatizer()
 def lemma(text):
