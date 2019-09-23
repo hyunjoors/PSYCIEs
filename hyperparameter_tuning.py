@@ -18,7 +18,8 @@ import os
 import pandas as pd
 import sys
 import xgboost as xgb
-
+import nltk
+import re
 
 
 
@@ -33,12 +34,6 @@ def clean_text(text):
     text = re.sub(r'[^a-zA-Z]', ' ', text)  # only keep english words/letters
     words = text.lower().split()  # lowercase
     return ' '.join(words)
-
-# Further clean text using wordnetlemmatizer
-lem = WordNetLemmatizer()
-def lemma(text):
-    words = nltk.word_tokenize(text)
-    return ' '.join([lem.lemmatize(w) for w in words])
 
 
 
@@ -58,13 +53,26 @@ dev_data = full_data.clean_text[1088:1388]
 test_data = full_data.clean_text[1388:1688]
 
 
+def import_features(param_dict):
+	bag_of_word = features.bag_of_word(*param_dict['bag_of_word'])
+	# doc2vec = features.doc2vec(*param_dict['doc2vec'])
+	# dtm = features.dtm(*param_dict['dtm'])
+	# sentiment = features.sentiment_analysis(*param_dict['sentiment_analysis'])
+	# ELMo = features.ELMo(*param_dict['ELMo'])
+	# lexi = features.lexical_diversity(*param_dict['lexical_diversity'])
+	# readability = features.readability(*param_dict['readability'])
+	# topic = features.topic_modeling(*param_dict['topic_modeling'])
+	print(bag_of_word)
+
+
+
 
 
 if __name__ == "__main__":
 
-	features = feature_selection(train_data)
+	features = feature_selection(full_data.clean_text)
 	param_dict = {
-      'bag_of_word': [],
+      'bag_of_word': [ngram_range=(1,2)],
 	  'doc2vec': [],
 	  'dtm': [],
 	  'sentiment_analysis': [],
@@ -73,11 +81,4 @@ if __name__ == "__main__":
 	  'readability': [],
 	  'topic_modeling': [],
   }
-	bag_of_word = features.bag_of_word(*param_dict['bag_of_word'])
-	doc2vec = features.doc2vec(*param_dict['doc2vec'])
-	dtm = features.dtm(*param_dict['dtm'])
-	sentiment = features.sentiment_analysis(*param_dict['sentiment_analysis'])
-	ELMo = features.ELMo(*param_dict['ELMo'])
-	lexi = features.lexical_diversity(*param_dict['lexical_diversity'])
-	readability = features.readability(*param_dict['readability'])
-	topic = features.topic_modeling(*param_dict['topic_modeling'])
+	import_features(param_dict)
