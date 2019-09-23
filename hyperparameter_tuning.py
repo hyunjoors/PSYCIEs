@@ -63,6 +63,9 @@ def import_features(param_dict):
 	# readability = features.readability(*param_dict['readability'])
 	# topic = features.topic_modeling(*param_dict['topic_modeling'])
 	print(bag_of_word)
+	Z_var_list = []
+
+	return Z_var_list
 
 
 
