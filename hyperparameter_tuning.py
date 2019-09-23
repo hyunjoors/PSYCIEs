@@ -3,24 +3,45 @@
 #######################################################################################################################
 
 from feature_extraction import feature_selection
-from sklearn import datasets
+from scipy.stats import pearsonr
 from sklearn.decomposition import TruncatedSVD, PCA
-from sklearn.ensemble import AdaBoostClassifier, GradientBoostingRegressor
+from sklearn.ensemble import RandomForestRegressor, AdaBoostClassifier, GradientBoostingRegressor
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
-from sklearn.linear_model import LinearRegression, ElasticNetCV
-from sklearn.metrics import classification_report
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet, MultiTaskElasticNet
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score, LeaveOneOut
 from sklearn.pipeline import Pipeline
-from sklearn.svm import SVC, SVR
+from sklearn.svm import SVR, LinearSVR
 from xgboost import XGBRegressor
 import csv
 import numpy as np
-import numpy.random as rand
 import os
 import pandas as pd
-import sklearn.metrics
 import sys
 import xgboost as xgb
+
+
+
+
+
+
+#######################################################################################################################
+# Helper functions
+# These functions are not the major feature extracting functions. (e.g., clean_text, lemma below)
+#######################################################################################################################
+# Pre-processing (not removing stopwords, no lemma, etc.)
+def clean_text(text):
+    text = re.sub(r'[^a-zA-Z]', ' ', text)  # only keep english words/letters
+    words = text.lower().split()  # lowercase
+    return ' '.join(words)
+
+# Further clean text using wordnetlemmatizer
+lem = WordNetLemmatizer()
+def lemma(text):
+    words = nltk.word_tokenize(text)
+    return ' '.join([lem.lemmatize(w) for w in words])
+
+
+
 
 ###############################################################################################################
 # Data preparation, pre-processing

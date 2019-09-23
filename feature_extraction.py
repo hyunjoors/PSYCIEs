@@ -8,14 +8,29 @@
 # Also, Please keep the documenation (120 char fro each line) and MUST comment&describe what you did.
 # Happy coding!
 
+from gensim.models import Doc2Vec
+from gensim.models import doc2vec
 from nltk.stem import WordNetLemmatizer
+from scipy import stats
+from sklearn import utils
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.compose import ColumnTransformer
+from sklearn.decomposition import SparsePCA, TruncatedSVD
+from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import StandardScaler
+from spellchecker import SpellChecker
+from tqdm import tqdm
+import language_check
+import nltk
 import numpy as np
 import os
 import pandas as pd
 import re
+import re
+import scipy
+import spacy
 import sys
-
 
 
 
@@ -55,7 +70,7 @@ class feature_selection:
     # maintain word order to a certain extent.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def bag_of_word(self, param):
+    def bag_of_word(self, *param):
         vectorizer = TfidfVectorizer(param)
         bag_of_word_matrix = vectorizer.fit_transform(self.input_data)
 
@@ -71,7 +86,7 @@ class feature_selection:
     # using vectors.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def doc2vec(self, param):
+    def doc2vec(self, *param):
         
         return doc2vec_matrix
 
@@ -84,7 +99,7 @@ class feature_selection:
     # Count the frequency of each token (word) that occur in a collection or individual document.
     # REFER: R
     ###################################################################################################################
-    def dtm(self, param):
+    def dtm(self, *param):
         
         return dtmd_matrix
 
@@ -97,7 +112,7 @@ class feature_selection:
     # Sentiment Analysis is used to extract and identify subjective information related to the emotion, such as
     # negation, amplification, profanity, joy, fear and surprise, behind the text response.
     ###################################################################################################################
-    def sentiment_analysis(self, param):
+    def sentiment_analysis(self, *param):
         
         return sentiment_analysis_matrix
 
@@ -110,7 +125,7 @@ class feature_selection:
     # ELMo is a deep contextualized word representation of text documents. It represents each word in a document
     # according to its context within the entire document, while implementing a neural-network.
     ###################################################################################################################
-    def ELMo(self, param):
+    def ELMo(self, *param):
         
         return ELMo_matrix
 
@@ -123,7 +138,7 @@ class feature_selection:
     # Lexical diversity is calculated using documents’ multiple indices, which are calculated as the ratio between the
     # number of types of tokens and number of tokens.
     ###################################################################################################################
-    def lexical_diversity(self, param):
+    def lexical_diversity(self, *param):
         
         return lexical_diversity_matrix
 
@@ -137,7 +152,7 @@ class feature_selection:
     # text’s complexity. Complexity is measured using attributes such as word length, sentence lengths, and syllable
     # counts.
     ###################################################################################################################
-    def readability(self, param):
+    def readability(self, *param):
         
         return readability_matrix
 
@@ -150,6 +165,6 @@ class feature_selection:
     # A text mining tool used to find semantic structure in a body of text to find the different topics in a collection
     # of documents.
     ###################################################################################################################
-    def topic_modeling(self, param):
+    def topic_modeling(self, *param):
         
         return topic_modeling_matrix
