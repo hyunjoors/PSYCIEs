@@ -42,20 +42,7 @@ def lemma(text):
 class feature_selection:
 
     def __init__(self):
-
-        ###############################################################################################################
-        # Data preparation, pre-processing
-        # Clean up the texts and prepare&divide the text into [train, dev, text]
-        ###############################################################################################################
-        full_data = pd.read_csv("./data/2019_siop_ml_comp_data.csv")
-        # csv data is in order of train(1088) -> dev(300) -> test(300)
-        full_data['full_text'] = full_data['open_ended_1'] + ' ' + full_data['open_ended_2'] + ' ' + \
-                                full_data['open_ended_3'] + ' ' + full_data['open_ended_4'] + ' ' + \
-                                full_data['open_ended_5']
-        full_data['clean_text'] = full_data.full_text.apply(clean_text)
-        train_data = full_data.clean_text[0:1088]
-        dev_data = full_data.clean_text[1088:1388]
-        test_data = full_data.clean_text[1388:1688]
+        pass
 
 
 
@@ -67,7 +54,7 @@ class feature_selection:
     # maintain word order to a certain extent.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def bag_of_word(input_data, param):
+    def bag_of_word(self, input_data, param):
         vectorizer = TfidfVectorizer(param)
         bag_of_word_matrix = vectorizer.fit_transform(input_data)
 
@@ -83,9 +70,7 @@ class feature_selection:
     # using vectors.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def doc2vec(input_data, param):
-        vectorizer = Doc2Vec(dm=0, vector_size=vectorsize, hs=0, negative=5, min_count=2, alpha=0.065, sample=0, min_alpha=0.065)
-        vectorizer.build_vocab()
+    def doc2vec(self, input_data, param):
         
         return doc2vec_matrix
 
@@ -98,7 +83,7 @@ class feature_selection:
     # Count the frequency of each token (word) that occur in a collection or individual document.
     # REFER: R
     ###################################################################################################################
-    def dtm(input_data, param):
+    def dtm(self, input_data, param):
         
         return dtmd_matrix
 
@@ -111,7 +96,7 @@ class feature_selection:
     # Sentiment Analysis is used to extract and identify subjective information related to the emotion, such as
     # negation, amplification, profanity, joy, fear and surprise, behind the text response.
     ###################################################################################################################
-    def sentiment_analysis(input_data, param):
+    def sentiment_analysis(self, input_data, param):
         
         return sentiment_analysis_matrix
 
@@ -124,7 +109,7 @@ class feature_selection:
     # ELMo is a deep contextualized word representation of text documents. It represents each word in a document
     # according to its context within the entire document, while implementing a neural-network.
     ###################################################################################################################
-    def ELMo(input_data, param):
+    def ELMo(self, input_data, param):
         
         return ELMo_matrix
 
@@ -137,7 +122,7 @@ class feature_selection:
     # Lexical diversity is calculated using documents’ multiple indices, which are calculated as the ratio between the
     # number of types of tokens and number of tokens.
     ###################################################################################################################
-    def lexical_diversity(input_data, param):
+    def lexical_diversity(self, input_data, param):
         
         return lexical_diversity_matrix
 
@@ -151,7 +136,7 @@ class feature_selection:
     # text’s complexity. Complexity is measured using attributes such as word length, sentence lengths, and syllable
     # counts.
     ###################################################################################################################
-    def readability(input_data, param):
+    def readability(self, input_data, param):
         
         return readability_matrix
 
@@ -164,6 +149,6 @@ class feature_selection:
     # A text mining tool used to find semantic structure in a body of text to find the different topics in a collection
     # of documents.
     ###################################################################################################################
-    def topic_modeling(input_data, param):
+    def topic_modeling(self, input_data, param):
         
         return topic_modeling_matrix
