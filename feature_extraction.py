@@ -9,11 +9,12 @@
 # Happy coding!
 
 from nltk.stem import WordNetLemmatizer
-import os
-import sys
-import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
+import os
+import pandas as pd
 import re
+import sys
 
 
 
