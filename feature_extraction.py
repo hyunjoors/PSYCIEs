@@ -1,11 +1,11 @@
 # September 20, 2019
-# Here are the features that needs to be implemented. Please refer how other teams used/extracted features from the 
+# Here are the features that need to be implemented. Please refer to how other teams used/extracted features from the
 # data. Also, these are not the only functions that are used in the project. For example, doc2vec includes several
 # other helper functions (e.g., lemma, label_sentences). Those helper functions are already implemented in each team's
-# code, that feel free to copy&paste them here.
+# code, and feel free to copy and paste them here.
 # Lastly, I have implemented bag-of-word to show what should be returned from a function. input_data will be
-# train_data. Please get familiarize with all features before start coding.
-# Also, Please keep the documenation (120 char fro each line) and MUST comment&describe what you did.
+# train_data. Please get familiarized with all the features before starting to code.
+# Also, Please keep the documentation (120 char for each line) and comment & describe what you have done.
 # Happy coding!
 
 from gensim.models import Doc2Vec
@@ -27,10 +27,11 @@ import numpy as np
 import os
 import pandas as pd
 import re
-import re
 import scipy
 import spacy
 import sys
+from stemming.porter import stem
+import shorttext
 
 
 
@@ -39,24 +40,20 @@ import sys
 # Helper functions
 # These functions are not the major feature extracting functions. (e.g., clean_text, lemma below)
 #######################################################################################################################
-# Further clean text using wordnetlemmatizer
+# Further clean text using WordNetLemmatizer
+
 lem = WordNetLemmatizer()
+
+
 def lemma(text):
     words = nltk.word_tokenize(text)
     return ' '.join([lem.lemmatize(w) for w in words])
 
 
-
-
-
-class feature_selection:
+class FeatureSelection:
 
     def __init__(self, input_data):
         self.input_data = input_data
-
-
-
-
 
     ###################################################################################################################
     # Bigram Bag-of-word
@@ -70,23 +67,28 @@ class feature_selection:
 
         return bag_of_word_matrix
 
-
-
-
-
     ###################################################################################################################
     # doc2vec
     # A vector representation of documents based on word2vec. Useful in detecting the relationship between words by
     # using vectors.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def doc2vec(self, *param):
-        
+    def doc2vec(self, *param, vector_size):
+        model = Doc2Vec(param)
+        model.build_vocab([x for x in tqdm(self.input_data)])
+
+        for epoch in range(10):  # Train the model for 10 epochs
+            model.train(utils.shuffle([x for x in tqdm(self.input_data)]), total_examples=len(self.input_data),
+                        epochs=1)  # Reshuffle
+            model.alpha -= 0.002
+            model.min_alpha = model.alpha
+
+        doc2vec_matrix = np.zeros((model, vector_size))  # Number of dimensional feature vectors to be extracted
+        for i in range(0, len(self.input_data)):
+            prefix = str(i)  # Don't know if prefix is correct!?
+            doc2vec_matrix[i] = model.docvecs[prefix]
+
         return doc2vec_matrix
-
-
-
-
 
     ###################################################################################################################
     # DTM (Document Term Matrix)
@@ -94,12 +96,22 @@ class feature_selection:
     # REFER: R
     ###################################################################################################################
     def dtm(self, *param):
+        # Don't know the exact structure of data being sent as argument so depending on that can change this function
+
+        # pipeline = [lambda s: re.sub('[^\w\s]', '', s),
+        #             lambda s: re.sub('[\d]', '', s),
+        #             lambda s: s.lower(),
+        #             lambda s: ' '.join(map(stem, shorttext.utils.tokenize(s)))]  # Pre-processing pipeline
+        # text_preprocessor = shorttext.utils.text_preprocessor(pipeline)
+        # docids = [i for i in range(0, len(self.input_data))]
+        # corpus = [text_preprocessor(response).split(" ") for response in self.input_data]
+        # dtmd_matrix = shorttext.utils.DocumentTermMatrix(corpus, docids=docids, tfidf=False)
+
+        docids = [i for i in range(0, len(self.input_data))]
+        corpus = [response for response in self.input_data]
+        dtmd_matrix = shorttext.utils.DocumentTermMatrix(corpus, docids=docids, tfidf=False)
         
         return dtmd_matrix
-
-
-
-
 
     ###################################################################################################################
     # Sentiment Analysis
