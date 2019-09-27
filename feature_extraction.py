@@ -93,6 +93,12 @@ def automated_readability_score(text):
 def coleman_liau_score(text):
     return textstatistics().coleman_liau_index(text)
 
+def word_count(text): 
+    return textstatistics().lexicon_count(text, removepunct=True)
+
+def tokenize(text):
+    return TextBlob(text).words
+
 
 class FeatureSelection:
 
@@ -204,6 +210,19 @@ class FeatureSelection:
     # REFER: Natural Selection
     ###################################################################################################################
     def readability(self, *param):
+        readability_matrix = pd.DataFrame()
+        readability_matrix["syllables_count"] = self.input_data.apply(syllables_count) 
+        readability_matrix["word_count"] = self.input_data.apply(word_count) 
+        readability_matrix["difficult_count"] = self.input_data.apply(difficult_word_count) 
+        readability_matrix["sentence_count"] = self.input_data.apply(sentence_count) 
+        readability_matrix["avg_syllables_per_word"] = self.input_data.apply(avg_syllables_per_word)
+        readability_matrix["avg_sentence_length"] = self.input_data.apply(avg_sentence_length) 
+        readability_matrix["flesch_ease_score"] = self.input_data.apply(flesch_ease_score) 
+        readability_matrix["flesch_grade_score"] = self.input_data.apply(flesch_grade_score) 
+        readability_matrix["linsear_write_score"] = self.input_data.apply(linsear_write_score) 
+        readability_matrix["dale_chall_score"] = self.input_data.apply(dale_chall_score) 
+        readability_matrix["smog_score"] = self.input_data.apply(smog_score) 
+        readability_matrix["coleman_liau_score"] = self.input_data.apply(coleman_liau_score)
         
         return readability_matrix
 
