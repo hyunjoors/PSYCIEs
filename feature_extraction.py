@@ -20,6 +20,8 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import StandardScaler
 from spellchecker import SpellChecker
+from stemming.porter import stem
+from textstat.textstat import textstatistics, easy_word_set, legacy_round 
 from tqdm import tqdm
 import language_check
 import nltk
@@ -28,10 +30,9 @@ import os
 import pandas as pd
 import re
 import scipy
+import shorttext
 import spacy
 import sys
-from stemming.porter import stem
-import shorttext
 
 
 
