@@ -44,11 +44,54 @@ import sys
 # Further clean text using WordNetLemmatizer
 
 lem = WordNetLemmatizer()
-
-
 def lemma(text):
     words = nltk.word_tokenize(text)
     return ' '.join([lem.lemmatize(w) for w in words])
+
+def syllables_count(text): 
+    return textstatistics().syllable_count(text) 
+
+def difficult_word_count(text):
+    return textstatistics().difficult_words(text)
+
+def sentence_count(text):
+    return textstatistics().sentence_count(text)
+
+def avg_syllables_per_word(text): 
+    nsyllables=syllables_count(text)
+    nwords=word_count(text)
+    ASPW=float(nsyllables)/float(nwords)
+    return legacy_round(ASPW,2)
+
+def avg_sentence_length(text): 
+    nwords = word_count(text) 
+    nsentences = sentence_count(text) 
+    average_sentence_length = float(nwords / nsentences) 
+    return legacy_round(average_sentence_length,2)
+  
+def flesch_ease_score(text):
+    return textstatistics().flesch_reading_ease(text)
+    
+def flesch_grade_score(text):
+    return textstatistics().flesch_kincaid_grade(text)
+
+def linsear_write_score(text):
+    return textstatistics().linsear_write_formula(text)
+
+def dale_chall_score(text):
+    return textstatistics().dale_chall_readability_score(text)
+
+def gunning_fog_score(text):
+    return textstatistics().gunning_fog(text)
+
+def smog_score(text):
+    return textstatistics().smog_index(text)
+
+def automated_readability_score(text):
+    return textstatistics().automated_readability_index(text)
+
+def coleman_liau_score(text):
+    return textstatistics().coleman_liau_index(text)
 
 
 class FeatureSelection:
@@ -158,6 +201,7 @@ class FeatureSelection:
     # Readability Indices are different measures of how difficult a text is to read. It is estimated by measuring a
     # text’s complexity. Complexity is measured using attributes such as word length, sentence lengths, and syllable
     # counts.
+    # REFER: Natural Selection
     ###################################################################################################################
     def readability(self, *param):
         

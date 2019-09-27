@@ -57,7 +57,8 @@ def import_features(param_dict):
 	bag_of_word = features.bag_of_word(*param_dict['bag_of_word'])
 	# doc2vec = features.doc2vec(*param_dict['doc2vec'])
 	# dtm = features.dtm(*param_dict['dtm'])
-	# sentiment = features.sentiment_analysis(*param_dict['sentiment_analysis'])
+	# sentiment = features.sentiment_analysis
+	# (*param_dict['sentiment_analysis'])
 	# ELMo = features.ELMo(*param_dict['ELMo'])
 	# lexi = features.lexical_diversity(*param_dict['lexical_diversity'])
 	# readability = features.readability(*param_dict['readability'])
