@@ -102,8 +102,16 @@ def tokenize(text):
 
 class FeatureSelection:
 
-    def __init__(self, input_data):
+    def __init__(self, input_data, features_dict):
         self.input_data = input_data
+        self.bag_of_word_param = features_dict['bag_of_word']
+        self.doc2vec_param = features_dict['doc2vec']
+        self.dtm_param = features_dict['dtm']
+        self.sentiment_analysis_param = features_dict['sentiment_analysis']
+        self.ELMo_param = features_dict['ELMo']
+        self.lexical_diversity_param = features_dict['lexical_diversity']
+        self.readability_param = features_dict['readability']
+        self.topic_modeling_param = features_dict['topic_modeling']
 
     ###################################################################################################################
     # Bigram Bag-of-word
@@ -111,8 +119,8 @@ class FeatureSelection:
     # maintain word order to a certain extent.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def bag_of_word(self, *param):
-        vectorizer = TfidfVectorizer(param)
+    def bag_of_word(self):
+        vectorizer = TfidfVectorizer(self.bag_of_word_param)
         bag_of_word_matrix = vectorizer.fit_transform(self.input_data)
 
         return bag_of_word_matrix
@@ -123,8 +131,8 @@ class FeatureSelection:
     # using vectors.
     # REFER: Team Procrustination
     ###################################################################################################################
-    def doc2vec(self, *param, vector_size):
-        model = Doc2Vec(param)
+    def doc2vec(self):
+        model = Doc2Vec(self.doc2vec_param)
         model.build_vocab([x for x in tqdm(self.input_data)])
 
         for epoch in range(10):  # Train the model for 10 epochs
@@ -143,9 +151,9 @@ class FeatureSelection:
     ###################################################################################################################
     # DTM (Document Term Matrix)
     # Count the frequency of each token (word) that occur in a collection or individual document.
-    # REFER: R
+    # REFER: PI-RATES (R)
     ###################################################################################################################
-    def dtm(self, *param):
+    def dtm(self):
         # Don't know the exact structure of data being sent as argument so depending on that can change this function
 
         # pipeline = [lambda s: re.sub('[^\w\s]', '', s),
@@ -167,8 +175,9 @@ class FeatureSelection:
     # Sentiment Analysis
     # Sentiment Analysis is used to extract and identify subjective information related to the emotion, such as
     # negation, amplification, profanity, joy, fear and surprise, behind the text response.
+    # REFER: PI-RATES (R), Logistic Aggression (R)
     ###################################################################################################################
-    def sentiment_analysis(self, *param):
+    def sentiment_analysis(self):
         
         return sentiment_analysis_matrix
 
@@ -180,8 +189,9 @@ class FeatureSelection:
     # ELMo (Embeddings from Language Models)
     # ELMo is a deep contextualized word representation of text documents. It represents each word in a document
     # according to its context within the entire document, while implementing a neural-network.
+    # REFER: Natural Selection (Py)
     ###################################################################################################################
-    def ELMo(self, *param):
+    def ELMo(self):
         
         return ELMo_matrix
 
@@ -193,8 +203,9 @@ class FeatureSelection:
     # Lexical Diversity
     # Lexical diversity is calculated using documents’ multiple indices, which are calculated as the ratio between the
     # number of types of tokens and number of tokens.
+    # REFER: Logistic Aggression (R)
     ###################################################################################################################
-    def lexical_diversity(self, *param):
+    def lexical_diversity(self):
         
         return lexical_diversity_matrix
 
@@ -206,10 +217,10 @@ class FeatureSelection:
     # Readability Indices
     # Readability Indices are different measures of how difficult a text is to read. It is estimated by measuring a
     # text’s complexity. Complexity is measured using attributes such as word length, sentence lengths, and syllable
-    # counts.
-    # REFER: Natural Selection
+    # counts, speeling errors, profanity, etc.
+    # REFER: Natural Selection (Py), PI-RATES (R), Logistic Aggression (R)
     ###################################################################################################################
-    def readability(self, *param):
+    def readability(self):
         readability_matrix = pd.DataFrame()
         readability_matrix["syllables_count"] = self.input_data.apply(syllables_count) 
         readability_matrix["word_count"] = self.input_data.apply(word_count) 
@@ -234,7 +245,8 @@ class FeatureSelection:
     # Topic Modeling
     # A text mining tool used to find semantic structure in a body of text to find the different topics in a collection
     # of documents.
+    # REFER: Logistic Aggression (R)
     ###################################################################################################################
-    def topic_modeling(self, *param):
+    def topic_modeling(self):
         
         return topic_modeling_matrix
