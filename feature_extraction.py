@@ -1,13 +1,13 @@
-# September 20, 2019
-# Here are the features that need to be implemented. Please refer to how other teams used/extracted features from the
-# data. Also, these are not the only functions that are used in the project. For example, doc2vec includes several
-# other helper functions (e.g., lemma, label_sentences). Those helper functions are already implemented in each team's
-# code, and feel free to copy and paste them here.
-# Lastly, I have implemented bag-of-word to show what should be returned from a function. input_data will be
-# train_data. Please get familiarized with all the features before starting to code.
-# Also, Please keep the documentation (120 char for each line) and comment & describe what you have done.
-# Happy coding!
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Created on Monday, ‎September ‎23, ‎2019, ‏‎12:47:06 PM
+Last Modified on Monday, November 4, 2019, 13:31:44 2019
 
+@author: Hyun Joo Shin
+"""
+
+from textblob import TextBlob
 from gensim.models import Doc2Vec
 from gensim.models import doc2vec
 from nltk.stem import WordNetLemmatizer
@@ -100,7 +100,7 @@ def tokenize(text):
     return TextBlob(text).words
 
 
-class FeatureSelection:
+class FeatureExtraction:
 
     def __init__(self, input_data, features_dict):
         self.input_data = input_data
@@ -157,7 +157,8 @@ class FeatureSelection:
         # Don't know the exact structure of data being sent as argument so depending on that can change this function
 
         # pipeline = [lambda s: re.sub('[^\w\s]', '', s),
-        #             lambda s: re.sub('[\d]', '', s),
+        #             lambda s: re.sub('[\d]', '
+        # ', s),
         #             lambda s: s.lower(),
         #             lambda s: ' '.join(map(stem, shorttext.utils.tokenize(s)))]  # Pre-processing pipeline
         # text_preprocessor = shorttext.utils.text_preprocessor(pipeline)

@@ -1,8 +1,13 @@
-# September 23, 2019
-# hyperparameter_tuning will collect the feature matrices from feature_extraction and
-#######################################################################################################################
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Created on Monday, ‎September ‎23, ‎2019, ‏‎12:58:27 PM
+Last Modified on Mon Nov  4 13:31:44 2019
 
-from feature_extraction import feature_selection
+@author: Hyun Joo Shin
+"""
+
+from feature_extraction import FeatureExtraction
 from scipy.stats import pearsonr
 from sklearn.decomposition import TruncatedSVD, PCA
 from sklearn.ensemble import RandomForestRegressor, AdaBoostClassifier, GradientBoostingRegressor
@@ -33,6 +38,7 @@ import re
 def clean_text(text):
     text = re.sub(r'[^a-zA-Z]', ' ', text)  # only keep english words/letters
     words = text.lower().split()  # lowercase
+    
     return ' '.join(words)
 
 
@@ -57,24 +63,42 @@ test_data = full_data.clean_text[1388:1688]
 # Process data with features and return Z_var_list, which will be used as 'X' in hyper parameter tuning
 ###############################################################################################################
 def import_features(features_dict):
-    bag_of_word = features.bag_of_word(*features_dict['bag_of_word'])
-    # doc2vec = features.doc2vec(*features_dict['doc2vec'])
-    # dtm = features.dtm(*features_dict['dtm'])
-    # sentiment = features.sentiment_analysis
-    # (*features_dict['sentiment_analysis'])
-    # ELMo = features.ELMo(*features_dict['ELMo'])
-    # lexi = features.lexical_diversity(*features_dict['lexical_diversity'])
-    # readability = features.readability(*features_dict['readability'])
-    # topic = features.topic_modeling(*features_dict['topic_modeling'])
-    print(bag_of_word)
+    features = pd.DataFrame()
+    features['bag_of_word'] = fs.bag_of_word(*features_dict['bag_of_word'])
+    # features['doc2vec'] = features.doc2vec(*features_dict['doc2vec'])
+    # feature['dtm'] = features.dtm(*features_dict['dtm'])
+    # features['sentiment'] = features.sentiment_analysis(*features_dict['sentiment_analysis'])
+    # features['ELMo'] = features.ELMo(*features_dict['ELMo'])
+    # features['lexi_div'] = features.lexical_diversity(*features_dict['lexical_diversity'])
+    # features['readability'] = features.readability(*features_dict['readability'])
+    # features['topic_model'] = features.topic_modeling(*features_dict['topic_modeling'])
+    print(features)
+    features.to_csv('./feature_results.csv')
     Z_var_list = []
 
     return Z_var_list
 
 ###############################################################################################################
-# Hyper-parameter tune
+# Train using single features only, then save the predicted scores & return correlatin for each feature
 ###############################################################################################################
-def tune(Z_var_list, X, y):
+def feature_eval(train_data):
+    feature_results = {
+        'O': {},
+        'C': {},
+        'E': {},
+        'A': {},
+        'N': {}
+    }
+    
+    
+    print(feature_results)
+    return feature_results
+
+###############################################################################################################
+# Hyper-parameter tuning with the selected features
+###############################################################################################################
+def tune(train_data, dev_data, selected_feature):
+    best_hyperparameters = []
     return best_hyperparameters
 
 
@@ -95,11 +119,19 @@ if __name__ == "__main__":
         'readability': {},
         'topic_modeling': {},
     }
-    features = feature_selection(full_data.clean_text, features_dict)
-    var_list = import_features(features_dict)
-    
+
     full_data['clean_text'] = full_data.full_text.apply(clean_text)
+
+    fs = FeatureExtraction(full_data.clean_text, features_dict)
+    feature_df = import_features(features_dict)
+    pd.concat([full_data, feature_df])
+    
     train_data = full_data.clean_text[0:1088]
     dev_data = full_data.clean_text[1088:1388]
     test_data = full_data.clean_text[1388:1688]
-    best_hyperparameter_list = tune(var_list, X, y)
+    
+    # select a number of features or all features
+    selected_feature = feature_eval(train_data)
+
+    best_hyperparameter_list = tune(train_data, dev_data, selected_feature)
+    
