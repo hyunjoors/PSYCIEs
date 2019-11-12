@@ -5,6 +5,9 @@ Created on Monday, ‎September ‎23, ‎2019, ‏‎12:47:06 PM
 Last Modified on Monday, November 4, 2019, 13:31:44 2019
 
 @author: Hyun Joo Shin
+
+@Note:
+GLoVe?
 """
 
 from textblob import TextBlob
@@ -33,7 +36,8 @@ import scipy
 import shorttext
 import spacy
 import sys
-
+import tensorflow_hub as hub
+import tensorflow as tf
 
 
 
@@ -99,6 +103,69 @@ def word_count(text):
 def tokenize(text):
     return TextBlob(text).words
 
+# Create a custom layer that allows us to update weights (lambda layers do not have trainable parameters!)
+class ElmoEmbeddingLayer(Layer):
+    def __init__(self, **kwargs):
+        self.dimensions = 1024
+        self.trainable=True
+        super(ElmoEmbeddingLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        self.elmo = hub.Module('https://tfhub.dev/google/elmo/2', trainable=self.trainable,
+                               name="{}_module".format(self.name))
+
+        self.trainable_weights += K.tf.trainable_variables(scope="^{}_module/.*".format(self.name))
+        super(ElmoEmbeddingLayer, self).build(input_shape)
+
+    def call(self, x, mask=None):
+        result = self.elmo(K.squeeze(K.cast(x, tf.string), axis=1),
+                      as_dict=True,
+                      signature='default',
+                      )['default']
+        return result
+
+    def compute_mask(self, inputs, mask=None):
+        return K.not_equal(inputs, '--PAD--')
+
+    def compute_output_shape(self, input_shape):
+        return (input_shape[0], self.dimensions)
+
+def ElmoRegressionModel(
+    dense_dropout_rate=0.5,
+    loss='mean_squared_error',
+    optimizer='adam',
+    metrics=['mse'],
+    print_summary=False,
+    include_hidden_layer=False,
+    hidden_layer_size=64
+):
+    inputs, embeddings = [], []
+    
+    for idx in range(1, 6):
+        _input = layers.Input(shape=(1,), dtype="string")
+        inputs.append(_input)
+        embedding = ElmoEmbeddingLayer()(_input)
+        embeddings.append(embedding)
+        
+    concat = layers.concatenate(embeddings)
+    dense = Dropout(dense_dropout_rate)(concat)
+    if include_hidden_layer:
+        dense = layers.Dense(hidden_layer_size, activation='relu')(dense)
+        dense = Dropout(dense_dropout_rate)(dense)
+    dense = layers.Dense(1, activation='relu')(dense)# (drop2)
+    
+    # If we want to do 5-way prediction within a single network
+    # dense = layers.Dense(5, activation='relu')(dense)
+    
+    model = Model(inputs=inputs, outputs=dense)
+
+    model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
+    
+    if print_summary:
+        model.summary()
+
+    return model
+
 
 class FeatureExtraction:
 
@@ -154,17 +221,6 @@ class FeatureExtraction:
     # REFER: PI-RATES (R)
     ###################################################################################################################
     def dtm(self):
-        # Don't know the exact structure of data being sent as argument so depending on that can change this function
-
-        # pipeline = [lambda s: re.sub('[^\w\s]', '', s),
-        #             lambda s: re.sub('[\d]', '
-        # ', s),
-        #             lambda s: s.lower(),
-        #             lambda s: ' '.join(map(stem, shorttext.utils.tokenize(s)))]  # Pre-processing pipeline
-        # text_preprocessor = shorttext.utils.text_preprocessor(pipeline)
-        # docids = [i for i in range(0, len(self.input_data))]
-        # corpus = [text_preprocessor(response).split(" ") for response in self.input_data]
-        # dtmd_matrix = shorttext.utils.DocumentTermMatrix(corpus, docids=docids, tfidf=False)
 
         docids = [i for i in range(0, len(self.input_data))]
         corpus = [response for response in self.input_data]
@@ -181,20 +237,6 @@ class FeatureExtraction:
     def sentiment_analysis(self):
         
         return sentiment_analysis_matrix
-
-
-
-
-
-    ###################################################################################################################
-    # ELMo (Embeddings from Language Models)
-    # ELMo is a deep contextualized word representation of text documents. It represents each word in a document
-    # according to its context within the entire document, while implementing a neural-network.
-    # REFER: Natural Selection (Py)
-    ###################################################################################################################
-    def ELMo(self):
-        
-        return ELMo_matrix
 
 
 
@@ -251,3 +293,60 @@ class FeatureExtraction:
     def topic_modeling(self):
         
         return topic_modeling_matrix
+
+
+
+
+
+    ###################################################################################################################
+    # ELMo (Embeddings from Language Models)
+    # ELMo is a deep contextualized word representation of text documents. It represents each word in a document
+    # according to its context within the entire document, while implementing a neural-network.
+    # REFER: Natural Selection (Py)
+    ###################################################################################################################
+    def ELMo(self):
+        
+        test_scores = []
+        train_scores = []
+        estimators = []
+
+        ATTRIBUTE_MODEL_PARAMS = [
+            dict(dense_dropout_rate=0.7),
+            dict(dense_dropout_rate=0.7),
+            dict(dense_dropout_rate=0.7),
+            dict(dense_dropout_rate=0.7),
+            dict(include_hidden_layer=True, dense_dropout_rate=0.2),
+        ]
+
+        for idx, att in enumerate(ATTRIBUTE_LIST):
+            print("Training for attribute {}".format(att))
+            model_params = ATTRIBUTE_MODEL_PARAMS[idx]
+            
+            clf = KerasRegressor(
+                build_fn=lambda: ElmoRegressionModel(**model_params),
+                epochs=10,
+                batch_size=32,
+                verbose=1
+            )
+            clf.fit(X_train, Y_train[:,idx], validation_data=(X_test, Y_test[:,idx]))
+            estimators.append(clf)
+
+            preds_test = clf.predict(X_test)
+            preds_train = clf.predict(X_train)
+            df_test[att + "_Pred"] = clf.predict(X_dev)
+            df_dev[att + "_Pred"] = clf.predict(X_dev_)
+            
+            pearson_r_test = pearsonr(Y_test[:,idx], preds_test)
+            pearson_r_train = pearsonr(Y_train[:,idx], preds_train)
+            
+            test_scores.append(pearson_r_test)
+            train_scores.append(pearson_r_train)
+            
+            print("{0} - Test r: {1}".format(att, pearson_r_test))
+            print("{0} - Train r: {1}".format(att, pearson_r_train))
+            print("")
+            
+        print("Average Test r: {}".format(sum([ts[0] for ts in test_scores]) / len(test_scores)))
+        print("Average Train r: {}".format(sum([ts[0] for ts in train_scores]) / len(train_scores)))
+        
+        return ELMo_matrix
