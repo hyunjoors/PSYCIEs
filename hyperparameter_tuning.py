@@ -28,8 +28,6 @@ import re
 
 
 
-
-
 #######################################################################################################################
 # Helper functions
 # These functions are not the major feature extracting functions. (e.g., clean_text, lemma below)
@@ -40,6 +38,7 @@ def clean_text(text):
     words = text.lower().split()  # lowercase
     
     return ' '.join(words)
+
 
 
 
@@ -57,6 +56,9 @@ full_data['clean_text'] = full_data.full_text.apply(clean_text)
 train_data = full_data.clean_text[0:1088]
 dev_data = full_data.clean_text[1088:1388]
 test_data = full_data.clean_text[1388:1688]
+
+
+
 
 
 ###############################################################################################################
@@ -78,6 +80,10 @@ def import_features(features_dict):
 
     return Z_var_list
 
+
+
+
+
 ###############################################################################################################
 # Train using single features only, then save the predicted scores & return correlatin for each feature
 ###############################################################################################################
@@ -93,6 +99,10 @@ def feature_eval(train_data):
     
     print(feature_results)
     return feature_results
+
+
+
+
 
 ###############################################################################################################
 # Hyper-parameter tuning with the selected features

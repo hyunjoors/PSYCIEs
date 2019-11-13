@@ -135,7 +135,7 @@ def ElmoRegressionModel(
     loss='mean_squared_error',
     optimizer='adam',
     metrics=['mse'],
-    print_summary=False,
+    print_summary=True,
     include_hidden_layer=False,
     hidden_layer_size=64
 ):
@@ -200,7 +200,8 @@ class FeatureExtraction:
     ###################################################################################################################
     def doc2vec(self):
         model = Doc2Vec(self.doc2vec_param)
-        model.build_vocab([x for x in tqdm(self.input_data)])
+        model.build_vocab([x for x in tqdm(
+            self.input_data)])
 
         for epoch in range(10):  # Train the model for 10 epochs
             model.train(utils.shuffle([x for x in tqdm(self.input_data)]), total_examples=len(self.input_data),
