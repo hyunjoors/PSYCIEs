@@ -2,18 +2,28 @@
 # -*- coding: utf-8 -*-
 """
 Created on Monday, ‎September ‎23, ‎2019, ‏‎12:47:06 PM
-Last Modified on Monday, November 4, 2019, 13:31:44 2019
-
+Last Modified on 2/11/2020
 @author: Hyun Joo Shin
 
 @Note:
 GLoVe?
 """
 
+from keras.layers import Dense, Dropout, Embedding, Flatten, Input, MaxPooling1D
+from keras.optimizers import Adam, SGD
+from keras.models import Sequential
+from keras.preprocessing.sequence import pad_sequences
+from keras.wrappers.scikit_learn import KerasRegressor
+from keras import backend as K 
+import keras.layers as layers
+from keras.models import Model, load_model
+from keras.engine import Layer
+
 from textblob import TextBlob
 from gensim.models import Doc2Vec
 from gensim.models import doc2vec
 from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 from scipy import stats
 from sklearn import utils
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -187,8 +197,17 @@ class FeatureExtraction:
     # REFER: Team Procrustination
     ###################################################################################################################
     def bag_of_word(self):
+        # print(self.bag_of_word_param)
         vectorizer = TfidfVectorizer(self.bag_of_word_param)
-        bag_of_word_matrix = vectorizer.fit_transform(self.input_data)
+        vector = vectorizer.fit_transform(self.input_data)
+        
+        # get the first vector out (for the first document)
+        first_vector_tfidfvectorizer=vector[0]
+        
+        # place tf-idf values in a pandas data frame
+        bag_of_word_matrix = pd.DataFrame(first_vector_tfidfvectorizer.T.todense(), index=vectorizer.get_feature_names(), columns=["tfidf"])
+        bag_of_word_matrix.sort_values(by=["tfidf"],ascending=False)
+        # print(bag_of_word_matrix)
 
         return bag_of_word_matrix
 
@@ -200,8 +219,7 @@ class FeatureExtraction:
     ###################################################################################################################
     def doc2vec(self):
         model = Doc2Vec(self.doc2vec_param)
-        model.build_vocab([x for x in tqdm(
-            self.input_data)])
+        model.build_vocab([x for x in tqdm(self.input_data)])
 
         for epoch in range(10):  # Train the model for 10 epochs
             model.train(utils.shuffle([x for x in tqdm(self.input_data)]), total_examples=len(self.input_data),
@@ -217,7 +235,7 @@ class FeatureExtraction:
         return doc2vec_matrix
 
     ###################################################################################################################
-    # DTM (Document Term Matrix)
+    # DTM (Document Term Matrix) ????Dynamic Topic Modeling
     # Count the frequency of each token (word) that occur in a collection or individual document.
     # REFER: PI-RATES (R)
     ###################################################################################################################
@@ -226,6 +244,18 @@ class FeatureExtraction:
         docids = [i for i in range(0, len(self.input_data))]
         corpus = [response for response in self.input_data]
         dtmd_matrix = shorttext.utils.DocumentTermMatrix(corpus, docids=docids, tfidf=False)
+        
+        
+        pipeline = [lambda s: re.sub('[^\w\s]', '', s),
+            lambda s: re.sub('[\d]', '', s),
+            lambda s: s.lower(),
+            lambda s: ' '.join(map(stem, shorttext.utils.tokenize(s)))
+        ]
+        txtpreproceesor = shorttext.utils.text_preprocessor(pipeline)
+        docids = list(usprezdf['yrprez'])    # defining document IDs
+        corpus = [txtpreproceesor(speech).split(' ') for speech in usprezdf['speech']]
+        dtm = shorttext.utils.DocumentTermMatrix(corpus, docids=docids, tfidf=False)
+
         
         return dtmd_matrix
 
@@ -306,48 +336,5 @@ class FeatureExtraction:
     # REFER: Natural Selection (Py)
     ###################################################################################################################
     def ELMo(self):
-        
-        test_scores = []
-        train_scores = []
-        estimators = []
-
-        ATTRIBUTE_MODEL_PARAMS = [
-            dict(dense_dropout_rate=0.7),
-            dict(dense_dropout_rate=0.7),
-            dict(dense_dropout_rate=0.7),
-            dict(dense_dropout_rate=0.7),
-            dict(include_hidden_layer=True, dense_dropout_rate=0.2),
-        ]
-
-        for idx, att in enumerate(ATTRIBUTE_LIST):
-            print("Training for attribute {}".format(att))
-            model_params = ATTRIBUTE_MODEL_PARAMS[idx]
-            
-            clf = KerasRegressor(
-                build_fn=lambda: ElmoRegressionModel(**model_params),
-                epochs=10,
-                batch_size=32,
-                verbose=1
-            )
-            clf.fit(X_train, Y_train[:,idx], validation_data=(X_test, Y_test[:,idx]))
-            estimators.append(clf)
-
-            preds_test = clf.predict(X_test)
-            preds_train = clf.predict(X_train)
-            df_test[att + "_Pred"] = clf.predict(X_dev)
-            df_dev[att + "_Pred"] = clf.predict(X_dev_)
-            
-            pearson_r_test = pearsonr(Y_test[:,idx], preds_test)
-            pearson_r_train = pearsonr(Y_train[:,idx], preds_train)
-            
-            test_scores.append(pearson_r_test)
-            train_scores.append(pearson_r_train)
-            
-            print("{0} - Test r: {1}".format(att, pearson_r_test))
-            print("{0} - Train r: {1}".format(att, pearson_r_train))
-            print("")
-            
-        print("Average Test r: {}".format(sum([ts[0] for ts in test_scores]) / len(test_scores)))
-        print("Average Train r: {}".format(sum([ts[0] for ts in train_scores]) / len(train_scores)))
         
         return ELMo_matrix
