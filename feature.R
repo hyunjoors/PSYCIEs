@@ -8,7 +8,6 @@ library(ldatuning)
 library(leaps)
 library(magrittr)
 library(neuralnet)
-# devtools::install_github("kbenoit/quanteda.dictionaries")
 library(quanteda.dictionaries)
 library(quanteda)
 library(randomForest)
@@ -40,6 +39,21 @@ paste_wo_NA <- function(x){
   return(paste(new_str, collapse = " "))
 }
 df$all_text <- apply(df[, paste0("open_ended_", 1:5)], 1, paste_wo_NA)
+
+
+# clean_corpus <- function(corpus){
+#   corpus <- tm_map(corpus, stripWhitespace)
+#   corpus <- tm_map(corpus, removePunctuation)
+#   corpus <- tm_map(corpus, content_transformer(tolower))
+#   corpus <- tm_map(corpus, removeWords, stopwords("en"))
+#   return(corpus)
+# }
+# 
+# # Apply your customized function to the tweet_corp: clean_corp
+# for(i in text_vars){
+#   df[[i]] <- VectorSource(df[[i]])
+#   dfn[[i]] <- clean_corpus(df[[i]])
+# }
 
 
 # 2. Topic Modeling -----------------------------------------------------------
@@ -229,33 +243,18 @@ readability_DB <- do.call(cbind,readability_DB[paste0("open_ended_", 1:5)]) %>%
   select(2,4,6,8,10) %>%
   `colnames<-`(c(paste0("readability_DB", 1:5)))
 
-# readability <- textstat_readability(soi.data$all_text, measure = c("Flesch.Kincaid", 
-#                                                                    "Dale.Chall.old",
-#                                                                    "Wheeler.Smith", 
-#                                                                    "meanSentenceLength",
-#                                                                    "meanWordSyllables",
-#                                                                    "Strain",
-#                                                                    "SMOG",
-#                                                                    "Scrabble",
-#                                                                    "FOG",
-#                                                                    "Farr.Jenkins.Paterson",
-#                                                                    "DRP",
-#                                                                    "Dale.Chall")) 
-
-# There is no "soi.data", guessing soi.data is just df
-
 readability <- textstat_readability(df$all_text, measure = c("Flesch.Kincaid", 
-                                                             "Dale.Chall.old",
-                                                             "Wheeler.Smith", 
-                                                             "meanSentenceLength",
-                                                             "meanWordSyllables",
-                                                             "Strain",
-                                                             "SMOG",
-                                                             "Scrabble",
-                                                             "FOG",
-                                                             "Farr.Jenkins.Paterson",
-                                                             "DRP",
-                                                             "Dale.Chall")) 
+                                                                   "Dale.Chall.old",
+                                                                   "Wheeler.Smith", 
+                                                                   "meanSentenceLength",
+                                                                   "meanWordSyllables",
+                                                                   "Strain",
+                                                                   "SMOG",
+                                                                   "Scrabble",
+                                                                   "FOG",
+                                                                   "Farr.Jenkins.Paterson",
+                                                                   "DRP",
+                                                                   "Dale.Chall")) 
 
 # 6. Lexical Diversity --------------------------------------------------------
 dtms_nzv <- list()
@@ -285,15 +284,13 @@ lex_div <- quanteda::textstat_lexdiv(dtm_agg, measure = c("C", "R", "D"))
 
 # 7. DTM --------------------------------------------------------
 
-soi.data <- df # seems like soi.data is df
-
 prep_fun <- tolower
 tok_fun <- word_tokenizer
 #all qs
-all.it_train <- itoken(soi.data$all_text,
+all.it_train <- itoken(df$all_text,
                        preprocessor = prep_fun,
                        tokenizer = tok_fun,
-                       ids = soi.data$Respondent_ID,
+                       ids = df$Respondent_ID,
                        progressbar = TRUE)
 all.vocab <- create_vocabulary(all.it_train)
 all.vocab <- prune_vocabulary(all.vocab, term_count_min = 25, doc_proportion_max = 0.90)#worked with 25/.90
@@ -302,10 +299,10 @@ all.dtm <- create_dtm(all.it_train, all.vectorizer)
 all.dtm.df <- data.frame(as.matrix(all.dtm)) #convert dtm to dataframe
 colnames(all.dtm.df) <- paste("all", colnames(all.dtm.df), sep ="_")
 #q1
-q1.it_train <- itoken(soi.data$open_ended_1,
+q1.it_train <- itoken(df$open_ended_1,
                       preprocessor = prep_fun,
                       tokenizer = tok_fun,
-                      ids = soi.data$Respondent_ID,
+                      ids = df$Respondent_ID,
                       progressbar = TRUE)
 q1.vocab <- create_vocabulary(q1.it_train)
 q1.vocab <- prune_vocabulary(q1.vocab, term_count_min = 25, doc_proportion_max = 0.90)
@@ -314,10 +311,10 @@ q1.dtm <- create_dtm(q1.it_train, q1.vectorizer)
 q1.dtm.df <- data.frame(as.matrix(q1.dtm)) #convert dtm to dataframe
 colnames(q1.dtm.df) <- paste("q1", colnames(q1.dtm.df), sep ="_")
 #q2
-q2.it_train <- itoken(soi.data$open_ended_2,
+q2.it_train <- itoken(df$open_ended_2,
                       preprocessor = prep_fun,
                       tokenizer = tok_fun,
-                      ids = soi.data$Respondent_ID,
+                      ids = df$Respondent_ID,
                       progressbar = TRUE)
 q2.vocab <- create_vocabulary(q2.it_train)
 q2.vocab <- prune_vocabulary(q2.vocab, term_count_min = 25, doc_proportion_max = 0.90)
@@ -326,10 +323,10 @@ q2.dtm <- create_dtm(q2.it_train, q2.vectorizer)
 q2.dtm.df <- data.frame(as.matrix(q2.dtm)) #convert dtm to dataframe
 colnames(q2.dtm.df) <- paste("q2", colnames(q2.dtm.df), sep ="_")
 #q3
-q3.it_train <- itoken(soi.data$open_ended_3,
+q3.it_train <- itoken(df$open_ended_3,
                       preprocessor = prep_fun,
                       tokenizer = tok_fun,
-                      ids = soi.data$Respondent_ID,
+                      ids = df$Respondent_ID,
                       progressbar = TRUE)
 q3.vocab <- create_vocabulary(q3.it_train)
 q3.vocab <- prune_vocabulary(q3.vocab, term_count_min = 25, doc_proportion_max = 0.90)
@@ -338,10 +335,10 @@ q3.dtm <- create_dtm(q3.it_train, q3.vectorizer)
 q3.dtm.df <- data.frame(as.matrix(q3.dtm)) #convert dtm to dataframe
 colnames(q3.dtm.df) <- paste("q3", colnames(q3.dtm.df), sep ="_")
 #q4
-q4.it_train <- itoken(soi.data$open_ended_4,
+q4.it_train <- itoken(df$open_ended_4,
                       preprocessor = prep_fun,
                       tokenizer = tok_fun,
-                      ids = soi.data$Respondent_ID,
+                      ids = df$Respondent_ID,
                       progressbar = TRUE)
 q4.vocab <- create_vocabulary(q4.it_train)
 q4.vocab <- prune_vocabulary(q4.vocab, term_count_min = 25, doc_proportion_max = 0.90)
@@ -350,10 +347,10 @@ q4.dtm <- create_dtm(q4.it_train, q4.vectorizer)
 q4.dtm.df <- data.frame(as.matrix(q4.dtm)) #convert dtm to dataframe
 colnames(q4.dtm.df) <- paste("q4", colnames(q4.dtm.df), sep ="_")
 #q5
-q5.it_train <- itoken(soi.data$open_ended_5,
+q5.it_train <- itoken(df$open_ended_5,
                       preprocessor = prep_fun,
                       tokenizer = tok_fun,
-                      ids = soi.data$Respondent_ID,
+                      ids = df$Respondent_ID,
                       progressbar = TRUE)
 q5.vocab <- create_vocabulary(q5.it_train)
 q5.vocab <- prune_vocabulary(q5.vocab, term_count_min = 25, doc_proportion_max = 0.90)
@@ -381,7 +378,7 @@ profanity <- sentimentr::profanity_by(df$all_text)$profanity_count
 
 
 # 9. Combine Predictors -------------------------------------------------------
-X <- cbind(
+X <- cbind(df,
   lda_probs_agg
   ,dictionaries
   ,sentiment
@@ -396,9 +393,10 @@ X <- cbind(
   ,profanity
   ,sentiment.all.df
   ,sentiment.q1.df, sentiment.q2.df, 
-                  sentiment.q3.df, sentiment.q4.df, sentiment.q5.df, readability,
-                  all.dtm.df, q1.dtm.df, q2.dtm.df, q3.dtm.df, q4.dtm.df, q5.dtm.df
+  sentiment.q3.df, sentiment.q4.df, sentiment.q5.df, readability,
+  all.dtm.df, q1.dtm.df, q2.dtm.df, q3.dtm.df, q4.dtm.df, q5.dtm.df
 )
 
 #export mega-dataset
-write.csv(X, "mega_dataset.csv")
+con<-file('mega_dataset.csv',encoding="UTF-8")
+write.csv(X, file=con)
