@@ -8,6 +8,7 @@ library(ldatuning)
 library(leaps)
 library(magrittr)
 library(neuralnet)
+# devtools::install_github("kbenoit/quanteda.dictionaries")
 library(quanteda.dictionaries)
 library(quanteda)
 library(randomForest)
@@ -228,18 +229,33 @@ readability_DB <- do.call(cbind,readability_DB[paste0("open_ended_", 1:5)]) %>%
   select(2,4,6,8,10) %>%
   `colnames<-`(c(paste0("readability_DB", 1:5)))
 
-readability <- textstat_readability(soi.data$all_text, measure = c("Flesch.Kincaid", 
-                                                                   "Dale.Chall.old",
-                                                                   "Wheeler.Smith", 
-                                                                   "meanSentenceLength",
-                                                                   "meanWordSyllables",
-                                                                   "Strain",
-                                                                   "SMOG",
-                                                                   "Scrabble",
-                                                                   "FOG",
-                                                                   "Farr.Jenkins.Paterson",
-                                                                   "DRP",
-                                                                   "Dale.Chall")) 
+# readability <- textstat_readability(soi.data$all_text, measure = c("Flesch.Kincaid", 
+#                                                                    "Dale.Chall.old",
+#                                                                    "Wheeler.Smith", 
+#                                                                    "meanSentenceLength",
+#                                                                    "meanWordSyllables",
+#                                                                    "Strain",
+#                                                                    "SMOG",
+#                                                                    "Scrabble",
+#                                                                    "FOG",
+#                                                                    "Farr.Jenkins.Paterson",
+#                                                                    "DRP",
+#                                                                    "Dale.Chall")) 
+
+# There is no "soi.data", guessing soi.data is just df
+
+readability <- textstat_readability(df$all_text, measure = c("Flesch.Kincaid", 
+                                                             "Dale.Chall.old",
+                                                             "Wheeler.Smith", 
+                                                             "meanSentenceLength",
+                                                             "meanWordSyllables",
+                                                             "Strain",
+                                                             "SMOG",
+                                                             "Scrabble",
+                                                             "FOG",
+                                                             "Farr.Jenkins.Paterson",
+                                                             "DRP",
+                                                             "Dale.Chall")) 
 
 # 6. Lexical Diversity --------------------------------------------------------
 dtms_nzv <- list()
@@ -268,6 +284,8 @@ lex_div <- quanteda::textstat_lexdiv(dtm_agg, measure = c("C", "R", "D"))
 
 
 # 7. DTM --------------------------------------------------------
+
+soi.data <- df # seems like soi.data is df
 
 prep_fun <- tolower
 tok_fun <- word_tokenizer
