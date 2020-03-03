@@ -376,8 +376,9 @@ errors <- unlist(lapply(hunspell::hunspell(df$all_text), length))
 # Profanity
 profanity <- sentimentr::profanity_by(df$all_text)$profanity_count
 
+# 9. Doc2Vec [Chen]
 
-# 9. Combine Predictors -------------------------------------------------------
+# 10. Combine Predictors -------------------------------------------------------
 X <- cbind(df,
   lda_probs_agg
   ,dictionaries
